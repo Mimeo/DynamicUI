@@ -23,7 +23,7 @@ namespace Mimeo.DynamicUI.Tests.OData
             var expression = expressionGenerator.GenerateODataFilter(query);
 
             // Assert
-            expression.Should().Be("tolower(TestProperty) eq tolower('Value')");
+            expression.Should().Be("tolower(TestProperty) eq 'value'");
         }
 
         [Fact]
@@ -42,15 +42,15 @@ namespace Mimeo.DynamicUI.Tests.OData
             var expression = expressionGenerator.GenerateODataFilter(query);
 
             // Assert
-            expression.Should().Be("TestProperty/any(i: tolower(i) eq tolower('Value'))");
+            expression.Should().Be("TestProperty/any(i: tolower(i) eq 'value')");
         }
         
         [Theory]
-        [InlineData(DataFilterOperator.Contains, "TestProperty/any(i: contains(tolower(i), tolower('Value')))")]
-        [InlineData(DataFilterOperator.DoesNotContain, "TestProperty/any(i: indexof(tolower(i), tolower('Value')) eq -1)")]
-        [InlineData(DataFilterOperator.StartsWith, "TestProperty/any(i: startswith(tolower(i), tolower('Value')))")]
-        [InlineData(DataFilterOperator.EndsWith, "TestProperty/any(i: endswith(tolower(i), tolower('Value')))")]
-        [InlineData(DataFilterOperator.Equals, "TestProperty/any(i: tolower(i) eq tolower('Value'))")]
+        [InlineData(DataFilterOperator.Contains, "TestProperty/any(i: contains(tolower(i), 'value'))")]
+        [InlineData(DataFilterOperator.DoesNotContain, "TestProperty/any(i: indexof(tolower(i), 'value') eq -1)")]
+        [InlineData(DataFilterOperator.StartsWith, "TestProperty/any(i: startswith(tolower(i), 'value'))")]
+        [InlineData(DataFilterOperator.EndsWith, "TestProperty/any(i: endswith(tolower(i), 'value'))")]
+        [InlineData(DataFilterOperator.Equals, "TestProperty/any(i: tolower(i) eq 'value')")]
         [InlineData(DataFilterOperator.IsNull, "TestProperty/any(i: tolower(i) eq null)")]
         [InlineData(DataFilterOperator.IsEmpty, "TestProperty/any(i: tolower(i) eq '')")]
         public void CanFilter_CaseInsensitive(DataFilterOperator @operator, string expectedQuery)
