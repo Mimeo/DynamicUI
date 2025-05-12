@@ -1,0 +1,22 @@
+﻿@using Mimeo.DynamicUI.Blazor.Extensions
+@using static Mimeo.DynamicUI.SelectFormFieldDefinition
+@inherits FormFieldBase<object>
+
+@if (ReadOnly && Items != null)
+{
+    <span>@(Items.FirstOrDefault(i => i.Value.Equals(Value))?.Name ?? Value)</span>
+}
+else if (Items != null)
+{
+    <RadzenDropDown id="@Id" Data="Items" TextProperty="Name" ValueProperty="Value" @bind-Value="@Value" Disabled="@(ReadOnly || Disabled)" Multiple="false" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" class="@Class" />
+}
+else if (SelectDefinition?.ItemSource != null)
+{
+    <DataSourceDropDownGrid Id="@Id" @bind-Value="Value" ItemSource="@SelectDefinition?.ItemSource" NameField="@SelectDefinition?.ItemSourceNameField" ValueField="@SelectDefinition?.ItemSourceValueField" ItemSourceDataQuery="@SelectDefinition?.ItemSourceDataQuery" Disabled="ReadOnly" />
+}
+
+@code {
+    private SingleSelectDropDownFormFieldDefinition? SelectDefinition => (SingleSelectDropDownFormFieldDefinition?)Definition;
+
+    private List<ListItem>? Items => SelectDefinition?.Items?.Select(i => new ListItem(lang[i.Name], i.Value))?.ToList();
+}

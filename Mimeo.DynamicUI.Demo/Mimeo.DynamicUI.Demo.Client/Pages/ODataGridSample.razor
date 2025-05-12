@@ -1,0 +1,65 @@
+﻿@page "/odata"
+@using Mimeo.DynamicUI.Demo.Client.Components
+@using Mimeo.DynamicUI.Demo.Shared.ViewModels
+@inject TestDataService testDataService
+@inject TestDataExportService testDataExportService
+
+<h3>Sample OData Grid</h3>
+
+<DynamicEditForm ViewModel="DemoOptions" />
+
+<ODataGrid Service="testDataService" 
+ImportExportDataService="testDataExportService" 
+DisableImportExportRoleCheck="true" 
+UseInlineSearch="@DemoOptions.UseInlineSearch" 
+FiltersQueryString="query"
+CustomFormFieldTypes="CustomFormFieldDefinitions"
+CustomRowActions="CustomRowActions" />
+
+@code {
+    protected DemoGridOptionsViewModel DemoOptions { get; set; } = default!;
+    protected Dictionary<string, Type> CustomFormFieldDefinitions = new()
+    {
+        ["testviewmodel_customformfield"] = typeof(CustomFormField)
+    };
+
+    protected List<CustomMenuItem> CustomRowActions = [];
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        DemoOptions = new();
+        DemoOptions.OnValueChanged = EventCallback.Factory.Create(this, () => StateHasChanged());
+
+        CustomRowActions = [
+            new()
+            {
+                Name = "Log Item to Browser Console", 
+                Icon = "cruelty_free", // 🐰
+                Callback = new EventCallback<ViewModel>(this, new Action<ViewModel>(vm => Console.WriteLine($"Custom action for view model '{(vm as TestViewModel)?.Name}' has been clicked.")))
+            }
+        ];
+    }
+
+    protected class DemoGridOptionsViewModel : ViewModel
+    {
+        // While the underlying view model values are changed immediately, 
+        // Blazor change detection doesn't work without some help.
+        // Blazor prefers changes to happen as a result of direct property binding.
+        public EventCallback OnValueChanged { get; set; }
+
+        public bool UseInlineSearch { get; set; }
+
+        protected override IEnumerable<FormFieldDefinition> GetEditFormFields()
+        {
+            yield return FormField(() => UseInlineSearch);
+        }
+
+        public override async void SetValue(FormFieldDefinition field, object? value)
+        {
+            base.SetValue(field, value);
+
+            await OnValueChanged.InvokeAsync();
+        }
+    }
+}

@@ -1,0 +1,11 @@
+﻿@inherits FormFieldBase<int>
+
+<span>Button has been clicked @Value times.</span>
+<RadzenButton Text="Button" Click="@OnButtonClicked" />
+
+@code {
+    private void OnButtonClicked()
+    {
+        Value += 1;
+    }
+}

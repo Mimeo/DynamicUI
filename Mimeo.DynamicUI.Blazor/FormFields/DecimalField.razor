@@ -1,0 +1,35 @@
+﻿@using System.Globalization
+@using DecimalMath
+
+@inherits FormFieldBase<decimal>
+
+@if (@ReadOnly)
+{
+    <span>@Value</span>
+}
+else
+{
+    <RadzenNumeric id="@Id" TValue="decimal" @bind-Value="@Value" Step="@Step" Disabled="@Disabled" />
+}
+
+@code {
+#pragma warning disable BL0007 // Component parameters should be auto properties
+    [Parameter]
+    public int DecimalPlaces
+    {
+        get => DecimalDefinition?.DecimalPlaces ?? 3;
+
+        set
+        {
+            if (DecimalDefinition == null) throw new InvalidOperationException("Decimal field definition is required.");
+            DecimalDefinition.DecimalPlaces = value;
+        }
+    }
+
+#pragma warning restore BL0007
+
+    private DecimalFieldDefinition? DecimalDefinition => Definition as DecimalFieldDefinition;
+
+    private string Step => (DecimalDefinition != null) ? DecimalEx.Pow(0.1m, DecimalDefinition.DecimalPlaces!.Value).ToString(CultureInfo.InvariantCulture) : "1";
+
+}

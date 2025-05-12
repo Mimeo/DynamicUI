@@ -1,0 +1,55 @@
+﻿@using Mimeo.DynamicUI.Blazor.Extensions
+@inherits FormFieldBase<object>
+
+<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Start" AlignItems="AlignItems.Center" Gap="10px">
+    @if (@ReadOnly)
+    {
+        <span>@ValueGuid</span>
+    }
+    else
+    {
+        <input class="@Class form-control" @bind-value="@ValueGuid" disabled="@Disabled">
+        <RadzenButton id="@Id" Visible="@(!ReadOnly)" Style="width: 130px" Text="@lang.GetValueOrDefault("generateguid")" ButtonType="ButtonType.Button" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Light" Click="GenerateGuid" Disabled="@Disabled"></RadzenButton>
+    }
+
+</RadzenStack>
+
+@code {
+
+    private void GenerateGuid()
+    {
+        ValueGuid = Guid.NewGuid();
+    }
+
+    private Guid ValueGuid
+    {
+        get
+        {
+            if (base.Definition?.PropertyType == typeof(Guid))
+            {
+                return (Guid?)Value ?? default;
+            }
+            else if (base.Definition?.PropertyType == typeof(string))
+            {
+                return Guid.TryParse(Value?.ToString(), out var parsedGuid) ? parsedGuid : default;
+            }
+
+            throw new Exception("Unable to determine guid property type");
+        }
+        set
+        {
+            if (base.Definition?.PropertyType == typeof(Guid))
+            {
+                Value = value;
+                return;
+            }
+            else if (base.Definition?.PropertyType == typeof(string))
+            {
+                Value = value.ToString();
+                return;
+            }
+
+            throw new Exception("Unable to determine guid property type");
+        }
+    }
+}

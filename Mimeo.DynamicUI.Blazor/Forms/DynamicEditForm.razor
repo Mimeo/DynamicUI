@@ -1,0 +1,168 @@
+﻿@using Mimeo.DynamicUI.Blazor.Extensions
+@inject DialogService dialogService
+@inject TaskRunningService taskRunningService
+
+@implements IDisposable
+
+<div class="@cssClass">
+    @if (Context != null) {
+        <div class="alert-danger mb-3" visible="@HasError">@ErrorMessage</div>
+
+        <EditForm EditContext="@Context" OnSubmit="@SubmitEventHandler">
+            <DataAnnotationsValidator />
+
+            @if (Template != null)
+            {
+                @Template
+            }
+            else if (ViewModel != null)
+            {
+                @foreach (var formField in ViewModel.GetEditForm().Values)
+                {
+                    if (formField.Type == FormFieldType.Section)
+                    {
+                        @if (formField is SectionFormFieldDefinition section)
+                        {
+                            <DynamicFormSection FormField="formField" ViewModel="@(section.SectionViewModel)" CustomFormFieldTypes="CustomFormFieldTypes" />
+                        }
+                    }
+                    else
+                    {
+                        <DynamicFormRow FormField="formField" ViewModel="ViewModel" CustomFormFieldTypes="CustomFormFieldTypes" />
+                    }
+                }
+            }
+
+            <div class="col-sm-12">
+                <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="10px">
+                    <RadzenButton Visible="@ShowSubmitButton" Disabled="@taskRunning" ButtonType="ButtonType.Submit" Text="@lang.GetValueOrDefault("submit")" />
+                    <RadzenButton Visible="@ShowCancelButton" Disabled="@taskRunning" Click="CancelEventHandler" ButtonStyle="ButtonStyle.Secondary" Text="@lang.GetValueOrDefault("cancel")" />
+                    <RadzenButton Visible="@ShowDeleteButton" Disabled="@taskRunning" Click="DeleteEventHandler" ButtonStyle="ButtonStyle.Danger" Text="@lang.GetValueOrDefault("delete")" />
+                </RadzenStack>
+            </div>
+        </EditForm>
+    }
+</div>
+
+@code {
+
+    [Parameter]
+    public ViewModel? ViewModel { get; set; }
+
+    [Parameter]
+    public RenderFragment? Template { get; set; }
+
+    [Parameter]
+    public EventCallback OnSubmit { get; set; }
+
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+    [Parameter]
+    public EventCallback OnDelete { get; set; }
+
+    [Parameter]
+    public string ErrorMessage { get; set; } = "";
+    private bool HasError => !string.IsNullOrWhiteSpace(ErrorMessage);
+
+    [Parameter]
+    public EventCallback<string> ErrorMessageChanged { get; set; }
+    private async Task SetErrorMessage(string value)
+    {
+        ErrorMessage = value;
+        await ErrorMessageChanged.InvokeAsync(value);
+    }
+
+    [Parameter]
+    public bool IsModal { get; set; }
+
+    [Parameter]
+    public bool ShowSubmitButton { get; set; } = true;
+
+    [Parameter]
+    public bool ShowCancelButton { get; set; }
+
+    [Parameter]
+    public bool ShowDeleteButton { get; set; }
+
+    [Parameter]
+    public string? DeleteMessageTitle { get; set; }
+
+    [Parameter]
+    public string? DeleteMessage { get; set; }
+
+    /// <summary>
+    /// For form fields of type <see cref="FormFieldType.Custom"/>, a dictionary matching form field property language keys to controls that can display them.
+    /// Controls must inherit <see cref="FormFieldBase{TValue}"/>.
+    /// </summary>
+    [Parameter]
+    public Dictionary<string, Type> CustomFormFieldTypes { get; set; } = [];
+
+    private string cssClass => IsModal ? "modal-wrapper" : "";
+
+    private EditContext? Context;
+    private bool taskRunning;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        taskRunningService.OnTaskRunningChanged += OnTaskRunningChanged;
+    }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+
+        if (ViewModel != null && Context?.Model != ViewModel)
+        {
+            Context = new EditContext(ViewModel);
+        }
+    }
+
+    private async Task SubmitEventHandler()
+    {
+        if (Context?.Validate() == true)
+        {
+            ErrorMessage = "";
+            try
+            {
+                await taskRunningService.Run(() => OnSubmit.InvokeAsync());
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = ex.Message;
+            }
+        }
+        else
+        {
+            ErrorMessage = lang.GetValueOrDefault("form_generic_validation_error");
+        }
+    }
+
+    private async Task CancelEventHandler()
+    {
+        await OnCancel.InvokeAsync();
+    }
+
+    private async Task DeleteEventHandler()
+    {
+        var title = DeleteMessageTitle ?? lang.GetValueOrDefault("dynamiceditform_deleteconfirm_defaulttitle");
+        var message = DeleteMessage ?? lang.GetValueOrDefault("dynamiceditform_deleteconfirm_defaulttext");
+        if (await dialogService.OpenConfirmation(title, message))
+        {
+            await OnDelete.InvokeAsync();
+        }
+    }
+
+    private void OnTaskRunningChanged(bool isRunning)
+    {
+        taskRunning = isRunning;
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        taskRunningService.OnTaskRunningChanged -= OnTaskRunningChanged;
+    }
+}

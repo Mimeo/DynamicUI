@@ -1,0 +1,11 @@
+﻿@inherits FormFieldBase<bool>
+
+<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Start" AlignItems="AlignItems.Center" Gap="10px">
+    <RadzenLabel Visible="@(!string.IsNullOrEmpty(NullableDefinition?.NullCheckboxLabel))" Text="@NullableDefinition?.NullCheckboxLabel"></RadzenLabel>
+    <RadzenSwitch @bind-Value="@Value" Disabled="@Disabled" />
+    <DynamicField Class="@Class" Disabled="@(!Value)" FormField="NullableDefinition?.FormFieldDefinition" ViewModel="ViewModel" />
+</RadzenStack>
+
+@code {
+    private NullableFormFieldDefinition? NullableDefinition => (NullableFormFieldDefinition?)Definition;
+}

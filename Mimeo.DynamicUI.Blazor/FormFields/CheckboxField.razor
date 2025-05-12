@@ -1,0 +1,17 @@
+﻿@inherits FormFieldBase<bool>
+
+@if (ReadOnly)
+{
+    if (Value)
+    {
+        <RadzenIcon Icon="done" />
+    }
+    else
+    {
+        <RadzenIcon Icon="close" />
+    }
+}
+else
+{
+    <RadzenSwitch id="@Id" @bind-Value="@Value" Disabled="@(ReadOnly || Disabled)" />
+}

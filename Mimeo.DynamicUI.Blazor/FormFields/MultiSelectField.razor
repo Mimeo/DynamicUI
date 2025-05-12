@@ -1,0 +1,25 @@
+﻿@using static Mimeo.DynamicUI.MultiSelectFormFieldDefinition
+@using static Mimeo.DynamicUI.SelectFormFieldDefinition
+@inherits FormFieldBase<List<string>>
+
+@if (Items != null)
+{
+    <RadzenCheckBoxList TValue="string" @bind-Value="ValueEnumerable" Data="Items" TextProperty="Name" ValueProperty="Value" Orientation="Orientation" />
+}
+
+@code {
+    private MultiSelectFormFieldDefinition? SelectDefinition => (MultiSelectFormFieldDefinition?)Definition;
+
+    private List<ListItem>? Items => SelectDefinition?.Items?.Select(i => new ListItem(lang[i.Name], i.Value))?.ToList();
+
+    private IEnumerable<string> ValueEnumerable
+    {
+        get => Value ?? Enumerable.Empty<string>();
+        set
+        {
+            Value = value.ToList();
+        }
+    }
+
+    private Orientation Orientation => SelectDefinition?.Orientation == OrientationValue.Horizontal ? Orientation.Horizontal : Orientation.Vertical;
+}

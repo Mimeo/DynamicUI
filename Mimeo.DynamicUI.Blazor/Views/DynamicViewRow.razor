@@ -1,0 +1,111 @@
+﻿@using System.Linq.Expressions
+@using Mimeo.DynamicUI.Extensions
+
+<div class="dynamic-view-row">
+    @if (FormField?.IsVisible == true || For != null)
+    {
+        <RadzenRow>
+            <RadzenColumn Size="3">
+                <div style="display:flex;">
+                    <RadzenIcon Icon="@(Collapsed ? "arrow_right" : "arrow_drop_down")" @onclick="@(() => Collapsed = !Collapsed)" Style="display:inline;cursor:pointer;" />
+                    <span title="@FormFieldDescription">@FormFieldName</span>
+                </div>
+            </RadzenColumn>
+            <RadzenColumn Size="9">
+                @if (!Collapsed)
+                {
+                    @if (ViewTemplate != null)
+                    {
+                        @ViewTemplate
+                    }
+                    else
+                    {
+                        <div>
+                            <DynamicField ReadOnly="true" Class="@Class" FormField="FormField" For="For" ViewModel="ViewModel" CustomFormFieldTypes="CustomFormFieldTypes" />
+                        </div>
+                        @if (!string.IsNullOrEmpty(FormFieldDescription))
+                        {
+                            <span class="form-field-description">@FormFieldDescription</span>
+                        }
+                    }
+                }
+            </RadzenColumn>
+        </RadzenRow>
+    }
+</div>
+
+@code {
+
+#pragma warning disable BL0007 // Component parameters should be auto properties
+    [Parameter]
+    public ViewModel? ViewModel { get; set; }
+
+    [Parameter]
+    public FormFieldDefinition? FormField { get; set; }
+
+    [Parameter]
+    public Expression<Func<object?>>? For { get; set; }
+
+    [Parameter]
+    public RenderFragment? ViewTemplate { get; set; }
+
+    [Parameter]
+    public string? Class { get; set; }
+
+    [Parameter]
+    public bool Collapsed
+    {
+        get
+        {
+            return _collapsed ?? FormField?.Collapsed ?? false;
+        }
+        set
+        {
+            _collapsed = value;
+        }
+    }
+    private bool? _collapsed;
+
+    /// <summary>
+    /// For form fields of type <see cref="FormFieldType.Custom"/>, a dictionary matching form field property language keys to controls that can display them.
+    /// Controls must inherit <see cref="FormFieldBase{TValue}"/>.
+    /// </summary>
+    [Parameter]
+    public Dictionary<string, Type> CustomFormFieldTypes { get; set; } = [];
+
+    private string FormFieldName
+    {
+        get
+        {
+            if (FormField != null)
+            {
+                return lang.GetPropertyName(FormField);
+            }
+            else if (For != null)
+            {
+                return lang.GetPropertyName(For);
+            }
+
+            throw new InvalidOperationException("DynamicFormRow must have either a FormField or For parameter set");
+        }
+    }
+
+
+    private string? FormFieldDescription
+    {
+        get
+        {
+            if (FormField != null)
+            {
+                return lang.GetPropertyDescription(FormField);
+            }
+            else if (For != null)
+            {
+                return lang.GetPropertyDescription(For);
+            }
+
+            return null;
+        }
+    }
+#pragma warning restore BL0007
+}

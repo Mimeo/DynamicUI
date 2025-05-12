@@ -1,0 +1,44 @@
+﻿<div class="@cssClass">
+    @if (Template != null)
+    {
+        @Template
+    }
+    else if (ViewModel != null)
+    {
+        @foreach (var formField in ViewModel.GetViewForm().Values)
+        {
+            if (formField.Type == FormFieldType.Section)
+            {
+                @if (formField is SectionFormFieldDefinition section)
+                {
+                    <DynamicViewSection FormField="formField" ViewModel="@(section.SectionViewModel)" CustomFormFieldTypes="CustomFormFieldTypes" />
+                }
+            }
+            else
+            {
+                <DynamicViewRow FormField="formField" ViewModel="ViewModel" CustomFormFieldTypes="CustomFormFieldTypes" />
+            }
+        }
+    }
+</div>
+
+
+@code {
+    [Parameter]
+    public ViewModel? ViewModel { get; set; }
+
+    [Parameter]
+    public RenderFragment? Template { get; set; }
+
+    [Parameter]
+    public bool IsModal { get; set; }
+
+    /// <summary>
+    /// For form fields of type <see cref="FormFieldType.Custom"/>, a dictionary matching form field property language keys to controls that can display them.
+    /// Controls must inherit <see cref="FormFieldBase{TValue}"/>.
+    /// </summary>
+    [Parameter]
+    public Dictionary<string, Type> CustomFormFieldTypes { get; set; } = [];
+
+    private string cssClass => IsModal ? "modal-wrapper" : "";
+}

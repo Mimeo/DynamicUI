@@ -1,0 +1,35 @@
+﻿@using Mimeo.DynamicUI.Extensions
+@if (FormField != null)
+{
+    <div class="mb-3 row">
+        <CollapsableFieldset Visible="FormField.IsVisible" Collapsed="FormField.Collapsed">
+            <HeaderTemplate>@lang.GetPropertyName(FormField)</HeaderTemplate>
+            <ChildContent>
+                <p class="form-field-description">@lang.GetPropertyDescription(FormField)</p>
+                @if (ViewModel != null)
+                {
+                    foreach (var formField in ViewModel.GetEditForm().Values)
+                    {
+                        <DynamicViewRow FormField="@formField" ViewModel="ViewModel" CustomFormFieldTypes="CustomFormFieldTypes" />
+                    }
+                }
+            </ChildContent>
+        </CollapsableFieldset>
+    </div>
+}
+
+@code
+{
+    [Parameter]
+    public ViewModel? ViewModel { get; set; }
+
+    [Parameter]
+    public FormFieldDefinition? FormField { get; set; }
+
+    /// <summary>
+    /// For form fields of type <see cref="FormFieldType.Custom"/>, a dictionary matching form field property language keys to controls that can display them.
+    /// Controls must inherit <see cref="FormFieldBase{TValue}"/>.
+    /// </summary>
+    [Parameter]
+    public Dictionary<string, Type> CustomFormFieldTypes { get; set; } = [];
+}

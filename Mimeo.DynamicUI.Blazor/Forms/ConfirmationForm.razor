@@ -1,0 +1,24 @@
+﻿@using Mimeo.DynamicUI.Blazor.Extensions
+<span>@Message</span>
+
+<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="10px">
+    <RadzenButton Click="OnYes" ButtonStyle="ButtonStyle.Primary" Text="@(YesText ?? lang.GetValueOrDefault("yes"))" />
+    <RadzenButton Click="OnNo" ButtonStyle="ButtonStyle.Light" Text="@(NoText ?? lang.GetValueOrDefault("no"))" />
+</RadzenStack>
+
+@code {
+    [Parameter]
+    public string? Message { get; set; }
+    
+    [Parameter]
+    public string? YesText { get; set; }
+
+    [Parameter]
+    public string? NoText { get; set; }
+
+    [Parameter]
+    public EventCallback OnYes { get; set; }
+
+    [Parameter]
+    public EventCallback OnNo { get; set; }
+}

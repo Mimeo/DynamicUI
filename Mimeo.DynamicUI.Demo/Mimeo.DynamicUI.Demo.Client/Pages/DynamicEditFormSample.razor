@@ -1,0 +1,32 @@
+﻿@page "/dynamic-edit-form"
+@using Mimeo.DynamicUI.Demo.Shared.ViewModels
+@inject TestDataService testDataService
+
+<h3>Sample Dynamic Edit Form</h3>
+
+<RadzenDropDown Multiple="false" Data="viewModels" @bind-Value="selectedValue" TextProperty="Name" ValueProperty="Id" />
+<RadzenButton Text="Force Set Parameters" Click="OnForceSetParameters" />
+
+@if (selectedViewModel != null)
+{
+    <DynamicEditForm ViewModel="selectedViewModel" ShowSubmitButton="false" DeleteMessage="@deleteMessage" />
+}
+
+@code {
+    List<TestViewModel>? viewModels;
+    string? selectedValue;
+    TestViewModel? selectedViewModel => viewModels?.FirstOrDefault(vm => vm.Id == selectedValue);
+    string? deleteMessage;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        viewModels = (await testDataService.GetModels(new DataQuery())).Value?.ToList() ?? [];
+    }
+
+    private void OnForceSetParameters()
+    {
+        // Helps test bugs with unnecessary rerenders
+        // This button helped test a fix for a bug where datadriven dropdowns requery data every time paraemeters were set to the same thing
+        deleteMessage = Guid.NewGuid().ToString();
+    }
+}

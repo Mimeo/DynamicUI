@@ -1,0 +1,18 @@
+﻿@inherits FormFieldBase<TimeSpan>
+
+@if (@ReadOnly)
+{
+    <span>@Value.ToString("t")</span>
+}
+else
+{
+    <input id="@Id" type="time" class="form-control" @bind-value="@ValueDate" disabled="@Disabled">
+}
+
+@code {
+    private DateTime ValueDate
+    {
+        get => DateTime.Now.Date + this.Value;
+        set => this.Value = value.TimeOfDay;
+    }
+}

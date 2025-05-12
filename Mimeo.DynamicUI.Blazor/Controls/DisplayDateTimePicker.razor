@@ -1,0 +1,91 @@
+﻿@using Mimeo.DynamicUI.Blazor.Extensions
+@inject IDateTimeConverter dateTimeConverter
+
+@if (@ReadOnly)
+{
+    @if (ShowTime)
+    {
+        <span title="@(DisplayValueStringLong)">@(DisplayValueStringShort)</span>
+    }
+    else
+    {
+        <span title="@(DisplayValueStringDateOnly)">@(DisplayValueStringDateOnly)</span>
+    }
+}
+else
+{
+    <RadzenDatePicker TValue="DateTime?" Id="@Id" Value="@DisplayValue" Change="@OnValueChange" ShowTime="@(ShowTime)" HourFormat="12" DateFormat="@RadzenDatePickerFormat" Disabled="Disabled" />
+}
+
+@code {
+
+    [Parameter]
+    public DateTime? Value { get; set; }
+
+    [Parameter]
+    public EventCallback<DateTime?> ValueChanged { get; set; }
+
+    [Parameter]
+    public bool ReadOnly { get; set; }
+
+    [Parameter]
+    public bool Disabled { get; set; }
+
+    [Parameter]
+    public string? Id { get; set; }
+
+    [Parameter]
+    public bool ShowTime { get; set; } = true;
+
+    [Parameter]
+    public DateDisplayMode DisplayMode { get; set; }
+
+    private string Format { get; set; } = default!;
+    private string FormatLong { get; set; } = default!;
+    private string FormatDateOnly { get; set; } = default!;
+
+    private string RadzenDatePickerFormat => ShowTime ? Format : FormatDateOnly;
+
+    private DateTime? DisplayValue
+    {
+        get
+        {
+            if (Value == null || Value.Value == default)
+            {
+                return null;
+            }
+
+            return dateTimeConverter.UtcToDisplay(Value.Value, DisplayMode);
+        }
+        set
+        {
+            if (value == null || value.Value == default)
+            {
+                Value = null;
+                return;
+            }
+
+            Value = dateTimeConverter.DisplayToUtc(value.Value, DisplayMode);
+        }
+    }
+    
+    private string DisplayValueStringLong => DisplayValue?.ToString(FormatLong) ?? "";
+    private string DisplayValueStringShort => DisplayValue?.ToString(Format) ?? "";
+    private string DisplayValueStringDateOnly => DisplayValue?.ToString(FormatDateOnly) ?? "";
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        
+        Format = lang.GetValueOrDefault("datetimeformat");
+        FormatLong = lang.GetValueOrDefault("datetimeformat_long");
+        FormatDateOnly = lang.GetValueOrDefault("datetimeformat_dateonly");
+    }
+
+    private async Task OnValueChange(DateTime? value)
+    {
+        DisplayValue = value.GetValueOrDefault();
+        await ValueChanged.InvokeAsync(Value);
+    }
+}
+

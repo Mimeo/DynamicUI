@@ -1,0 +1,21 @@
+﻿@using Mimeo.DynamicUI.Blazor.Extensions
+@using Radzen.Blazor.Rendering
+
+<div @ref=_customSplitButton class="data-filter-field">
+    <button class="data-filter-field-primary" @onclick="@(() => _popup!.ToggleAsync(_customSplitButton))">
+        @string.Join("/", Filter.FilterDefinition.GetPath().Select(p => lang[p.FormFieldDefinition.LanguageKey]))
+        @(SelectedFilterOperator?.Label ?? "??")
+        <DynamicField FormField="@Filter.FilterDefinition.FormFieldDefinition" ViewModel="@Filter" For="@(() => Filter.Value)" ReadOnly="true" />
+    </button>
+    <button class="data-filter-field-secondary" @onclick="@OnDelete">
+        <RadzenIcon Icon="close" />
+    </button>
+</div>
+
+<Popup @ref=_popup class="data-field-popup" Style="display:none;position:absolute;width:300px;padding:5px;border:var(--rz-panel-border);background-color:var(--rz-panel-background-color);">
+    <div class="data-field-popup-content">
+        <RadzenDropDown TValue="FilterOperatorItem" Data="_filterOperators" @bind-Value=SelectedFilterOperator TextProperty="Label" />
+        <DynamicField FormField="@Filter.FilterDefinition.FormFieldDefinition" ViewModel="@Filter" For="@(() => Filter.Value)" />
+        <RadzenButton Text="@lang.GetValueOrDefault("save")" Click="@OnSave" />
+    </div>
+</Popup>

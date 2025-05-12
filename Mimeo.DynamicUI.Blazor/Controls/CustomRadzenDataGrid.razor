@@ -1,0 +1,37 @@
+﻿@typeparam TItem
+@inherits RadzenDataGrid<TItem>
+
+@inject TaskRunningService taskRunningService
+@implements IDisposable
+
+@{
+    base.BuildRenderTree(__builder);
+}
+
+@code {
+
+    [Parameter]
+    public bool DisableTaskRunningDetection { get; set; }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        taskRunningService.OnTaskRunningChanged += OnTaskRunningChanged;
+    }
+
+    private void OnTaskRunningChanged(bool taskRunning)
+    {
+        if (!DisableTaskRunningDetection)
+        {
+            this.IsLoading = taskRunning;
+            StateHasChanged();
+        }
+    }
+
+    public override void Dispose()
+    {
+        taskRunningService.OnTaskRunningChanged -= OnTaskRunningChanged;
+        base.Dispose();
+    }
+}

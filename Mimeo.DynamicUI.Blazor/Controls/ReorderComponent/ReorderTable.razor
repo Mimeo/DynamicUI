@@ -1,0 +1,55 @@
+﻿@typeparam TItem
+@inject TooltipService tooltipService
+
+@if (Columns != null)
+{
+  <CascadingValue Value="this">
+      @Columns
+  </CascadingValue>  
+}
+
+<table class="table table-striped table-bordered table-sm table-valign-m" style="width:100%;">
+    <thead>
+        <tr>
+            <th></th>
+            @foreach (var column in columns)
+            {
+                <th>@column.HeaderTemplate</th>
+            }
+        </tr>
+    </thead>
+    <tbody ondragover="event.preventDefault();">        
+        @if (Items?.Any() == true) {
+            var i = 0;
+            @foreach (var item in Items) {
+                <DragItem TItem="TItem"
+                    TableMode="true"
+                    Item="item"
+                    CurrentIndex="i++"
+                    DragSourceIndex="oldIndex"
+                    OnDragStart="() => OnDragStart(item)"
+                    OnDrop="() => OnDrop(item)">
+
+                    <ItemTemplate>
+                        <td>
+                            <RadzenIcon Icon="reorder" MouseEnter="@(element => tooltipService.Open(element, lang["reordertable_dragtorearrange"], new TooltipOptions(){ Position = TooltipPosition.Bottom }))" Style="vertical-align: middle" Visible="true" />
+                            <RadzenButton Icon="arrow_upward" ButtonStyle="ButtonStyle.Light" Click="() => MoveUp(item)" />
+                            <RadzenButton Icon="arrow_downward" ButtonStyle="ButtonStyle.Light" Click="() => MoveDown(item)" />
+                        </td>
+                        @foreach (var column in columns)
+                        {
+                            <td style="@column.Style?.Invoke(item)">@column.DataTemplate?.Invoke(item)</td>
+                        }
+                    </ItemTemplate>
+                </DragItem>
+            }
+        }
+        else {
+            <tr>
+                <td colspan="@(columns.Count + 1)">
+                    @EmptyTemplate
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

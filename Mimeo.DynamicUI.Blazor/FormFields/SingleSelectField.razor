@@ -1,0 +1,16 @@
+﻿@using static Mimeo.DynamicUI.SingleSelectFormFieldDefinition
+@using static Mimeo.DynamicUI.SelectFormFieldDefinition
+@inherits FormFieldBase<string>
+
+@if (Items != null)
+{
+    <RadzenRadioButtonList TValue="string" @bind-Value="Value" Data="Items" TextProperty="Name" ValueProperty="Value" Orientation="Orientation" />
+}
+
+@code {
+    private SingleSelectFormFieldDefinition? SelectDefinition => (SingleSelectFormFieldDefinition?)Definition;
+
+    private List<ListItem>? Items => SelectDefinition?.Items?.Select(i => new ListItem(lang[i.Name], i.Value))?.ToList();
+
+    private Orientation Orientation => SelectDefinition?.Orientation == OrientationValue.Horizontal ? Orientation.Horizontal : Orientation.Vertical;
+}

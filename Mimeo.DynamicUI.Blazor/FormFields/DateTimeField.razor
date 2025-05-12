@@ -1,0 +1,56 @@
+﻿@inherits FormFieldBase<object>
+
+<DisplayDateTimePicker Id="@Id" ReadOnly="@ReadOnly" @bind-Value="@DateTime" ShowTime="ShowTime" DisplayMode="DisplayMode" />
+
+@code {
+    #pragma warning disable BL0007 // Component parameters should be auto properties
+    [Parameter]
+    public bool ShowTime { get => _showTime ?? DateTimeDefinition?.ShowTime ?? false; set => _showTime = value; }
+    private bool? _showTime;
+
+    [Parameter]
+    public DateDisplayMode DisplayMode { get => _displayMode ?? DateTimeDefinition?.DisplayMode ?? DateDisplayMode.Raw; set => _displayMode = value; }
+    private DateDisplayMode? _displayMode;
+
+    private DateTime? DateTime
+    {
+        get
+        {
+            if (Value is DateTime dt)
+            {
+                return dt;
+            }
+            else if (Value is DateTimeOffset dto)
+            {
+                return dto.UtcDateTime;
+            }
+            else
+            {
+                return null;
+            }
+        }
+        set
+        {
+            if (DateTimeDefinition?.PropertyType == typeof(DateTimeOffset))
+            {
+                Value = new DateTimeOffset(value.GetValueOrDefault());
+            }
+            else if (DateTimeDefinition?.PropertyType == typeof(DateTimeOffset?))
+            {
+                Value = value.HasValue ? new DateTimeOffset(value.Value) : (DateTimeOffset?)null;
+            }
+            else if (DateTimeDefinition?.PropertyType == typeof(DateTime))
+            {
+                Value = value.GetValueOrDefault();
+            }
+            else
+            {
+                Value = value;
+            }
+        }
+    }
+
+#pragma warning restore BL0007
+
+    private DateTimeFieldDefinition? DateTimeDefinition => Definition as DateTimeFieldDefinition;
+}

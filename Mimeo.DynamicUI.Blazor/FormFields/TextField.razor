@@ -1,0 +1,103 @@
+﻿@using Mimeo.DynamicUI.Extensions
+@using BlazorMonaco
+@using BlazorMonaco.Editor
+@using BlazorMonaco.Languages
+
+@inherits FormFieldBase<string>
+
+@if (@ReadOnly && TextType != TextType.Code)
+{
+    <span>@Value</span>
+}
+else
+{
+    switch(TextType)
+    {
+        case TextType.SingleLine:
+            if (Items != null)
+            {
+                <datalist id="@dataListId">
+                    @foreach (var item in Items)
+                    {
+                        <option value="@item" />
+                    }                    
+                </datalist>
+                <input id="@Id" class="form-control" @bind-value="@Value" list="@dataListId" disabled="@Disabled">
+            }
+            else
+            {
+                <input id="@Id" class="form-control" @bind-value="@Value" disabled="@Disabled">
+            }
+            break;
+        case TextType.MultiLine:
+            <textarea id="@Id" class="form-control" @bind="@Value" disabled="@Disabled" />
+            break;
+        case TextType.HTML:
+            <RadzenHtmlEditor id="@Id" @bind-Value="@Value" disabled="@Disabled" />
+            break;
+        case TextType.Code:
+            <div class="monaco-container">
+                <StandaloneCodeEditor Id="@Id" @ref="standaloneCodeEditor" ConstructionOptions="JsonEditorOptions" OnDidChangeModelContent="OnJsonChanged" />
+            </div>
+            break;
+    }
+}
+
+@code {
+    public TextField()
+    {
+        Id = $"TextField{Guid.NewGuid():N}";
+    }
+
+    #pragma warning disable BL0007 // Component parameters should be auto properties
+    private string dataListId => !string.IsNullOrEmpty(Id) ? Id + "DataList" : (Definition?.PropertyName ?? Guid.NewGuid().ToString("N")) + "DataList";
+    
+    [Parameter]
+    public TextType TextType { get => _textType ?? TextDefinition?.TextType ?? TextType.SingleLine; set => _textType = value; }
+    private TextType? _textType;
+
+    [Parameter]
+    public string? CodeLanguage { get => _codeLanguage ?? TextDefinition?.CodeLanguage; set => _codeLanguage = value; }
+    private string? _codeLanguage;
+
+    [Parameter]
+    public string? PlaceholderLanguageKey { get => _placeholderLanguageKey ?? TextDefinition?.PlaceholderLanguageKey; set => _placeholderLanguageKey = value; }
+    private string? _placeholderLanguageKey;
+
+    [Parameter]
+    public List<string>? Items { get => _items ?? TextDefinition?.Items; set => _items = value; }
+    private List<string>? _items;
+
+    private TextFieldDefinition? TextDefinition => Definition as TextFieldDefinition;
+#pragma warning restore BL0007
+
+    private StandaloneCodeEditor? standaloneCodeEditor;
+
+    private StandaloneEditorConstructionOptions JsonEditorOptions(StandaloneCodeEditor editor)
+    {
+        return new StandaloneEditorConstructionOptions
+        {
+            AutomaticLayout = true,
+            Language = CodeLanguage ?? "",
+            Theme = "vs-dark",
+            Value = Value,
+            ReadOnly = ReadOnly || Disabled,
+        };
+    }
+
+    private async Task OnJsonChanged(ModelContentChangedEvent e)
+    {
+        if (standaloneCodeEditor == null)
+        {
+            throw new InvalidOperationException("standaloneCodeEditor must be initialized before receiving events from it");
+        }
+
+        Value = await standaloneCodeEditor.GetValue();
+    }
+
+    public override void Dispose()
+    {
+        base.Dispose();
+        standaloneCodeEditor?.Dispose();
+    }
+}

@@ -1,0 +1,142 @@
+﻿@typeparam TItem
+
+@if (TableMode)
+{
+    <tr 
+        draggable="true"
+        class="@cssClasses"
+        @ondrop="@(args => Div_OnDrop(Item, args))" 
+        @ondragstart="@(args => Div_OnDragStart(Item, args))" 
+        @ondragend="@(args => Div_OnDragEnd(Item, args))" 
+        @ondragenter="@(args => Div_OnDragEnter(Item, args))" 
+        @ondragleave="@(args => Div_OnDragLeave(Item, args))"
+    >
+        @if (Item != null)
+        {
+            @if (ItemTemplate != null)
+            {
+                @ItemTemplate(Item)
+            }
+        }
+    </tr>
+}
+else
+{
+    <div 
+        draggable="true"
+        class="@cssClasses"
+        @ondrop="@(args => Div_OnDrop(Item, args))" 
+        @ondragstart="@(args => Div_OnDragStart(Item, args))" 
+        @ondragend="@(args => Div_OnDragEnd(Item, args))" 
+        @ondragenter="@(args => Div_OnDragEnter(Item, args))" 
+        @ondragleave="@(args => Div_OnDragLeave(Item, args))"
+    >
+        @if (Item != null)
+        {
+            @if (ItemTemplate != null)
+            {
+                @ItemTemplate(Item)
+            }
+            else
+            {
+                @Item.ToString()
+            }
+        }
+    </div>
+}
+
+@code {
+
+    [Parameter]
+    public TItem? Item { get; set; }
+
+    [Parameter]
+    public int CurrentIndex { get; set; }
+
+    [Parameter]
+    public int DragSourceIndex { get; set; }
+
+    [Parameter]
+    public bool TableMode { get; set; }
+
+    [Parameter]
+    public RenderFragment<TItem>? ItemTemplate { get; set; }
+
+    [Parameter]
+    public EventCallback<DragEventArgs> OnDragStart { get; set; }
+
+    [Parameter]
+    public EventCallback<DragEventArgs> OnDragEnd { get; set; }
+
+    [Parameter]
+    public EventCallback<DragEventArgs> OnDrop { get; set; }
+
+    private bool isDragSource;
+    private bool isDragTarget;
+
+    private string? cssClasses;
+
+    protected void Div_OnDragEnter(TItem? targetItem, DragEventArgs args)
+    {
+        isDragSource = false;
+        isDragTarget = true;
+        refreshStyles();
+    }
+
+    protected void Div_OnDragLeave(TItem? targetItem, DragEventArgs args)
+    {
+        isDragSource = false;
+        isDragTarget = false;
+        refreshStyles();
+    }
+
+    protected async Task Div_OnDragStart(TItem? draggedItem, DragEventArgs args)
+    {
+        isDragSource = true;
+        isDragTarget = false;
+        refreshStyles();
+
+        await OnDragStart.InvokeAsync(args);
+    }
+
+    protected async Task Div_OnDragEnd(TItem? draggedItem, DragEventArgs args)
+    {
+        isDragSource = false;
+        isDragTarget = false;
+        refreshStyles();
+
+        await OnDragEnd.InvokeAsync(args);
+    }
+
+    protected async Task Div_OnDrop(TItem? targetItem, DragEventArgs args)
+    {
+        isDragSource = false;
+        isDragTarget = false;
+        refreshStyles();
+
+        await OnDrop.InvokeAsync(args);
+    }
+
+    private void refreshStyles()
+    {
+        var classes = "";
+        if (isDragSource)
+        {
+            classes += "dragSource ";
+        }
+
+        if (isDragTarget)
+        {
+            classes += "dragTarget ";
+            if (CurrentIndex < DragSourceIndex)
+            {
+                classes += "dragTargetPrevious ";
+            }
+            else if (CurrentIndex > DragSourceIndex)
+            {                
+                classes += "dragTargetNext ";
+            }
+        }
+        this.cssClasses = classes.Trim();
+    }
+}

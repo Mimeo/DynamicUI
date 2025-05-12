@@ -1,0 +1,38 @@
+﻿@inherits FormFieldBase<object>
+
+<DisplayDateFilterPicker Id="@Id" ReadOnly="ReadOnly" @bind-Value="@DateFilter" DisplayMode="DisplayMode" />
+
+@code {
+    #pragma warning disable BL0007 // Component parameters should be auto properties
+    [Parameter]
+    public DateDisplayMode DisplayMode { get => _displayMode ?? DateSearchFieldDefinition?.DisplayMode ?? DateDisplayMode.Raw; set => _displayMode = value; }
+    private DateDisplayMode? _displayMode;
+
+    private DateFilter? DateFilter
+    {
+        get
+        {
+            if (Value is DateFilter dateFilter)
+            {
+                return dateFilter;
+            }
+            return null;
+        }
+        set
+        {
+            Value = value;
+        }
+    }
+
+#pragma warning restore BL0007
+
+    private DateSearchFieldDefinition? DateSearchFieldDefinition => Definition as DateSearchFieldDefinition;
+
+    protected override void OnParametersSet()
+    {
+        if (DateFilter is null)
+        {
+            DateFilter = new DateFilter(DateFilterOption.Today);
+        }
+    }
+}

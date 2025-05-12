@@ -1,0 +1,10 @@
+﻿@inherits FormFieldBase<int>
+
+@if (@ReadOnly)
+{
+    <span>@Value</span>
+}
+else
+{
+    <RadzenNumeric id="@Id" TValue="int" @bind-Value="@Value" disabled="@Disabled" />
+}

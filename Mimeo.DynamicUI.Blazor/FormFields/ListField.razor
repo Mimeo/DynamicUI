@@ -1,0 +1,145 @@
+﻿@using Mimeo.DynamicUI.Blazor.Controls.ReorderComponent
+@using Mimeo.DynamicUI.Blazor.Extensions
+@using Mimeo.DynamicUI.Blazor.Views
+@using Mimeo.DynamicUI.Extensions
+@typeparam T
+@inherits FormFieldBase<List<T>>
+
+@if (!wrapInViewModel && ListDefinition?.PresentationMode == ListFieldPresentationMode.SectionList)
+{
+    if (ReadOnly)
+    {
+        <RadzenStack Orientation="Orientation.Vertical" Gap="1em">
+            @foreach (var item in Value ?? [])
+            {
+                var viewModel = item as ViewModel ?? throw new NotSupportedException("ReorderableSectionList only supports listing View Models");
+                    <CollapsableFieldset>
+                        <HeaderTemplate>
+                            @if (ListDefinition.HeaderField != null)
+                            {
+                                var headerField = ListDefinition.HeaderField(item);
+
+                                <span style="margin-right:1em" title="@lang.GetPropertyDescription(headerField)">@lang.GetPropertyName(headerField):</span>
+                                <DynamicField ViewModel="viewModel" FormField="headerField" ReadOnly="ReadOnly" />
+                            }
+                        </HeaderTemplate>
+                        <ChildContent>
+                            <DynamicView ViewModel="viewModel" />
+                        </ChildContent>
+                    </CollapsableFieldset>
+            }
+        </RadzenStack>
+    }
+    else
+    {
+        <RadzenStack Orientation="Orientation.Vertical" Gap="1em">
+            @foreach (var item in Value ?? [])
+            {
+                var viewModel = item as ViewModel ?? throw new NotSupportedException("ReorderableSectionList only supports listing View Models");
+
+                <CollapsableFieldset>
+                    <HeaderTemplate>
+                        @if (ListDefinition.HeaderField != null)
+                        {
+                            var headerField = ListDefinition.HeaderField(item);
+
+                            <span style="margin-right:1em" title="@lang.GetPropertyDescription(headerField)">@lang.GetPropertyName(headerField):</span>
+                            <DynamicField ViewModel="viewModel" FormField="headerField" ReadOnly="ReadOnly" />
+                        }
+                    </HeaderTemplate>
+                    <ChildContent>
+                        <DynamicEditForm ViewModel="viewModel" ShowSubmitButton="false" ShowDeleteButton="true" OnDelete="() => OnDelete(item)" />
+                    </ChildContent>
+                </CollapsableFieldset>
+            }
+        </RadzenStack>
+        <RadzenButton Icon="add_circle_outline" style="margin-top:1em;margin-bottom:1em;" Text="@lang.GetValueOrDefault("add")" Click="() => OnCreate(CreateViewModel())" />
+    }
+}
+else if (!wrapInViewModel && ListDefinition?.PresentationMode == ListFieldPresentationMode.ReorderableSectionList)
+{
+    if (ReadOnly)
+    {
+        <RadzenStack Orientation="Orientation.Vertical" Gap="1em">
+            @foreach (var item in Value ?? [])
+            {
+                var viewModel = item as ViewModel ?? throw new NotSupportedException("ReorderableSectionList only supports listing View Models");
+
+                <CollapsableFieldset>
+                    <HeaderTemplate>
+                        @if (ListDefinition.HeaderField != null)
+                        {
+                            var headerField = ListDefinition.HeaderField(item);
+
+                            <span style="margin-right:1em" title="@lang.GetPropertyDescription(headerField)">@lang.GetPropertyName(headerField):</span>
+                            <DynamicField ViewModel="viewModel" FormField="headerField" ReadOnly="ReadOnly" />
+                        }
+                    </HeaderTemplate>
+                    <ChildContent>
+                        <DynamicView ViewModel="viewModel" />
+                    </ChildContent>
+                </CollapsableFieldset>
+            }
+        </RadzenStack>
+    }
+    else
+    {
+        <ReorderList Items="Value">
+            <ItemTemplate Context="item">
+                @{
+                    var viewModel = item as ViewModel ?? throw new NotSupportedException("ReorderableSectionList only supports listing View Models");
+                }
+
+                <CollapsableFieldset>
+                    <HeaderTemplate>
+                        @if (ListDefinition.HeaderField != null)
+                        {
+                            var headerField = ListDefinition.HeaderField(item);
+
+                            <span style="margin-right:1em" title="@lang.GetPropertyDescription(headerField)">@lang.GetPropertyName(headerField):</span>
+                            <DynamicField ViewModel="viewModel" FormField="headerField" ReadOnly="ReadOnly" />
+                        }
+                    </HeaderTemplate>
+                    <ChildContent>
+                        <DynamicEditForm ViewModel="viewModel" ShowSubmitButton="false" ShowDeleteButton="true" OnDelete="() => OnDelete(item)" />
+                    </ChildContent>
+                </CollapsableFieldset>
+            </ItemTemplate>
+        </ReorderList>
+
+        <RadzenButton Icon="add_circle_outline" style="margin-top:1em;margin-bottom:1em;" Text="@lang.GetValueOrDefault("add")" Click="() => OnCreate(CreateViewModel())" />
+    }
+}
+else
+{
+    // The historic default
+
+    if (ReadOnly && wrapInViewModel)
+    {
+        foreach (var item in simpleViewModels ?? [])
+        {
+            <DynamicField FormField="item.GetEditForm().Values.Single()" ReadOnly="true" ViewModel="item" />
+            <br />
+        }
+    }
+    else
+    {
+        if (wrapInViewModel)
+        {
+            <InlineEditGrid TViewModel="SimpleViewModel" 
+                            FullInlineEditing="true" 
+                            ListFormFields="GetListFormFieldsSimple()" 
+                            ListMethod="LoadDataSimple" 
+                            ViewModelConstructor="CreateViewModelSimple"
+                            CreateMethod="@(!ReadOnly ? OnCreateSimple : null)"
+                            UpdateMethod="@(!ReadOnly ? OnUpdateSimple : null)"
+                            DeleteMethod="@(!ReadOnly ? OnDeleteSimple : null)" 
+                            DisableTaskRunningDetection="true"
+                            />
+        }
+        else
+        {
+            @RenderNonSimpleInlineEditGrid()
+        }
+    }
+}

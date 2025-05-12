@@ -1,0 +1,335 @@
+﻿@using System.Linq.Dynamic.Core
+@using Mimeo.DynamicUI.Blazor.Extensions
+@using Mimeo.DynamicUI.Extensions
+
+@inject TooltipService tooltipService
+@inject DialogService dialogService
+@inject TaskRunningService taskRunningService
+
+@typeparam TViewModel where TViewModel : ViewModel
+
+<CustomRadzenDataGrid @ref="@grid" TItem="GridItem" 
+            Data="@items"
+            LoadData="@LoadData"
+            AllowColumnResize="true" 
+            Responsive="IsSmall"
+            AllowSorting="true"
+            Density="Density"
+            EditMode="DataGridEditMode.Single"
+            RowUpdate="OnUpdateRow" RowCreate="OnCreateRow"
+            DisableTaskRunningDetection="DisableTaskRunningDetection">
+    <Columns>
+        @foreach (var formField in ListFormFields ?? Enumerable.Empty<FormFieldDefinition>())
+        {
+            <RadzenDataGridColumn TItem="GridItem"
+            Property="@($"{nameof(GridItem.ViewModel)}." + formField.PropertyName)"
+            Title="@(lang.GetPropertyName(formField))" 
+            Sortable="formField.Sortable" 
+            Filterable="formField.Filterable"
+            SortOrder="@(formField.DefaultSortDirection switch {SortDirection.Ascending => SortOrder.Ascending, SortDirection.Descending => SortOrder.Descending, _ => null})">
+                <HeaderTemplate>
+                    <span title="@lang.GetPropertyDescription(formField)">@lang.GetPropertyName(formField)</span>
+                </HeaderTemplate>
+                <Template Context="item">
+                    <DynamicField FormField="@item.ViewModel.GetListForm()[formField.PropertyName]" ReadOnly="@(!FullInlineEditing)" ViewModel="item.ViewModel" />
+                </Template>
+                <EditTemplate Context="item">
+                    <DynamicField FormField="@item.ViewModel.GetListForm()[formField.PropertyName]" ViewModel="item.ViewModel" />
+                </EditTemplate>
+            </RadzenDataGridColumn>
+        }
+        @if (CanUpdate && !FullInlineEditing)
+        {
+            <RadzenDataGridColumn TItem="GridItem" Title="@lang.GetValueOrDefault("edit")" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="60px">
+                <Template Context="item">
+                    <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Size="MenuButtonSize" Class="m-1" Click="item.OnEditClick" MouseEnter="item.OnEditMouseEnter" />
+                </Template>
+                <EditTemplate Context="item">
+                    <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Primary" Size="MenuButtonSize" Class="m-1" Click="item.OnSaveClick" MouseEnter="item.OnSaveMouseEnter" />
+                    <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Size="MenuButtonSize" Class="m-1" Click="item.OnCancelClick" MouseEnter="item.OnCancelMouseEnter" />
+                </EditTemplate>
+            </RadzenDataGridColumn>
+        }
+        @if (CanDelete)
+        {
+            <RadzenDataGridColumn TItem="GridItem" Title="@lang.GetValueOrDefault("delete")" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="60px">
+                <Template Context="item">
+                    <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Size="MenuButtonSize" Class="m-1" Click="item.OnDeleteClick" MouseEnter="item.OnDeleteMouseEnter" />
+                </Template>
+            </RadzenDataGridColumn>
+        }
+    </Columns>
+</CustomRadzenDataGrid>
+
+@if (CanCreate)
+{
+    <RadzenButton Icon="add_circle_outline" style="margin-top:1em;margin-bottom:1em;" Text="@lang.GetValueOrDefault("add")" Click="InsertRow" Disabled=@(itemToInsert != null) />
+}
+
+<MediaQuery Media="@Breakpoints.LargeUp" @bind-Matches="IsLarge" />
+<MediaQuery Media="@Breakpoints.SmallDown" @bind-Matches="IsSmall" />
+
+@code {
+    [Parameter]
+    public IEnumerable<FormFieldDefinition>? ListFormFields { get; set; }
+
+    [Parameter]
+    public Func<Task<IEnumerable<TViewModel>>>? ListMethod { get; set; }
+
+    [Parameter]
+    public Func<TViewModel>? ViewModelConstructor { get; set; }
+
+    [Parameter]
+    public Func<TViewModel, Task>? CreateMethod { get; set; }
+    private bool CanCreate => CreateMethod != null;
+
+    [Parameter]
+    public Func<TViewModel, Task>? UpdateMethod { get; set; }
+    private bool CanUpdate => UpdateMethod != null;
+
+    [Parameter]
+    public Func<TViewModel, Task>? DeleteMethod { get; set; }
+    private bool CanDelete => DeleteMethod != null;
+
+    [Parameter]
+    public bool FullInlineEditing { get; set; }
+
+    [Parameter]
+    public bool ConfirmDeletes { get; set; } = false;
+
+    [Parameter]
+    public string? DeleteDialogTitle { get; set; }
+
+    [Parameter]
+    public string? DeleteDialogMessage { get; set; }
+
+    [Parameter]
+    public Density Density { get; set; } = Density.Compact;
+    private ButtonSize MenuButtonSize => Density == Density.Compact ? ButtonSize.Small : ButtonSize.Medium;
+
+    [Parameter]
+    public bool DisableTaskRunningDetection { get; set; }
+
+    private bool IsSmall;
+    private bool IsLarge;
+
+    private RadzenDataGrid<GridItem>? grid;
+    private IEnumerable<GridItem>? items = null;
+    private GridItem? itemToInsert;
+    private GridItem? itemToUpdate;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+
+        if (ListFormFields == null)
+        {
+            var sampleViewModel = items?.FirstOrDefault()?.ViewModel ?? CreateViewModel();
+            ListFormFields = sampleViewModel.GetListForm().Values;
+        }
+    }
+
+    private async Task LoadData(LoadDataArgs args)
+    {
+        if (ListMethod == null)
+        {
+            throw new InvalidOperationException("ListMethod is required");
+        }
+
+        IEnumerable<TViewModel> viewModels;
+        if (DisableTaskRunningDetection)
+        {
+            viewModels = await ListMethod();
+        }
+        else
+        {
+            viewModels = await taskRunningService.Run(() => ListMethod());
+        }
+
+        var query = viewModels.Select(v => CreateGridItem(v)).AsQueryable();
+        
+        if (!string.IsNullOrEmpty(args.OrderBy))
+        {
+            query = query.OrderBy(args.OrderBy);
+        }
+
+        if (!string.IsNullOrEmpty(args.Filter))
+        {
+            query = query.Where(args.Filter);
+        }
+
+        items = query.ToList();
+    }
+
+    private async Task ReloadData()
+    {
+        if (grid == null)
+        {
+            throw new InvalidOperationException("grid reference has not yet been bound");
+        }
+
+        await grid.Reload();
+    }
+
+    private async Task InsertRow()
+    {
+        if (FullInlineEditing)
+        {
+            // If we're editing everything at once, let's just go ahead and add the new item to the list
+            if (CreateMethod == null)
+            {
+                throw new InvalidOperationException("CreateMethod is required");
+            }
+            await CreateMethod(CreateViewModel());
+            await ReloadData();
+        }
+        else
+        {
+            itemToInsert = CreateGridItem(CreateViewModel());
+            if (grid == null) throw new InvalidOperationException("Cannot interact with grid before it's been bound");
+            await grid.InsertRow(itemToInsert);
+        }
+    }
+
+    private async Task EditRow(GridItem item)
+    {
+        itemToUpdate = item;
+        if (grid == null) throw new InvalidOperationException("Cannot interact with grid before it's been bound");
+        await grid.EditRow(item);
+    }
+
+    private async Task SaveRow(GridItem item)
+    {
+        if (item == itemToInsert)
+        {
+            itemToInsert = null;
+        }
+        if (grid == null) throw new InvalidOperationException("Cannot interact with grid before it's been bound");
+        await grid.UpdateRow(item);
+    }
+
+    private void CancelEdit(GridItem item)
+    {
+        if (item == itemToUpdate)
+        {
+            itemToUpdate = null;
+        }
+        if (grid == null) throw new InvalidOperationException("Cannot interact with grid before it's been bound");
+        grid.CancelEditRow(item);
+    }
+
+    private async Task DeleteRow(GridItem item)
+    {
+        if (DeleteMethod == null)
+        {
+            throw new InvalidOperationException("DeleteMethod is required");
+        }
+
+        if (item == itemToInsert)
+        {
+            itemToInsert = null;
+        }
+        if (item == itemToUpdate)
+        {
+            itemToUpdate = null;
+        }
+
+        var title = DeleteDialogTitle ?? lang.GetValueOrDefault("dynamiceditform_deleteconfirm_defaulttitle");
+        var message = DeleteDialogMessage ?? lang.GetValueOrDefault("dynamiceditform_deleteconfirm_defaulttext");
+        if (ConfirmDeletes)
+        {
+            if (!await dialogService.OpenConfirmation(title, message))
+            {
+                return;
+            }
+        }
+
+        await DeleteMethod(item.ViewModel);
+        await ReloadData();
+    }
+
+    private async Task OnCreateRow(GridItem item)
+    {
+        if (CreateMethod == null)
+        {
+            throw new InvalidOperationException("CreateMethod is required");
+        }
+
+        await CreateMethod(item.ViewModel);
+        await ReloadData();
+
+        itemToInsert = null;
+    }
+
+    private async Task OnUpdateRow(GridItem item)
+    {
+        if (UpdateMethod == null)
+        {
+            throw new InvalidOperationException("UpdateMethod is required");
+        }
+
+        await UpdateMethod(item.ViewModel);
+        await ReloadData();
+
+        itemToUpdate = null;
+    }
+
+    private TViewModel CreateViewModel()
+    {
+        if (ViewModelConstructor != null)
+        {
+            return ViewModelConstructor();
+        }
+
+        if (typeof(TViewModel).GetConstructor(Array.Empty<Type>()) != null)
+        {
+            return Activator.CreateInstance<TViewModel>();
+        }
+
+        throw new InvalidOperationException("TViewModel must have a default constructor, or ViewModelConstructor must be provided");
+    }
+
+    private void ShowTooltip(ElementReference element, string languageKey)
+    {
+        tooltipService.Open(element, lang[languageKey], new TooltipOptions() { Position = TooltipPosition.Bottom });
+    }
+
+    private GridItem CreateGridItem(TViewModel viewModel)
+    {
+        return new GridItem
+        {
+            ViewModel = viewModel,
+            EditRow = EditRow,
+            SaveRow = SaveRow,
+            CancelRow = CancelEdit,
+            DeleteRow = DeleteRow,
+            ShowTooltip = ShowTooltip
+        };
+    }
+
+    // Confine creation of delegates to this class and not in the UI
+    // Otherwise blazor will have to recreate them on every render
+    // Additional reading: https://github.com/dotnet/aspnetcore/issues/17886#issuecomment-565794337
+    private class GridItem
+    {
+        public TViewModel ViewModel { get; set; } = default!;
+
+        public Func<GridItem, Task> EditRow { get; set; } = default!;
+        public Func<GridItem, Task> SaveRow { get; set; } = default!;
+        public Action<GridItem> CancelRow { get; set; } = default!;
+        public Func<GridItem, Task> DeleteRow { get; set; } = default!;
+        public Action<ElementReference, string> ShowTooltip { get; set; } = default!;
+
+        public async Task OnEditClick(MouseEventArgs args) => await EditRow(this);
+        public void OnEditMouseEnter(ElementReference element) => ShowTooltip(element, "edit");
+
+        public async Task OnSaveClick(MouseEventArgs args) => await SaveRow(this);
+        public void OnSaveMouseEnter(ElementReference element) => ShowTooltip(element, "save");
+
+        public Task OnCancelClick(MouseEventArgs args) { CancelRow(this); return Task.CompletedTask; }
+        public void OnCancelMouseEnter(ElementReference element) => ShowTooltip(element, "cancel");
+
+        public async Task OnDeleteClick(MouseEventArgs args) => await DeleteRow(this);
+        public void OnDeleteMouseEnter(ElementReference element) => ShowTooltip(element, "delete");
+    }
+}

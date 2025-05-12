@@ -1,0 +1,115 @@
+﻿@using Mimeo.DynamicUI.Blazor.Extensions
+@using Mimeo.DynamicUI.Extensions
+@using Mimeo.DynamicUI.Blazor.Forms.DataFilter
+
+@inject DialogService dialogService
+@inject TooltipService tooltipService
+@inject IJSRuntime JSRuntime
+@inject TaskRunningService taskRunningService
+
+
+<RadzenStack AlignItems="AlignItems.Start" Orientation="Orientation.Horizontal" Gap="2">
+    <RadzenButton Visible="CanCreate" Text="@lang.GetValueOrDefault("add")" Click="@(async args => await OpenEditDialogAsync())"></RadzenButton>
+
+    @if (ImportExportDataService != null) 
+    {
+        <ImportExportButtons 
+        ImportExportDataService="@ImportExportDataService"
+        ExportFilter="@previousQuery"
+        ImportExportRole="@ImportExportRole"
+        DisableImportExportRoleCheck="@DisableImportExportRoleCheck"
+        OnImportComplete="@OnImportComplete" />
+    }
+</RadzenStack>
+
+@if (filterViewModel != null)
+{
+    <RadzenStack Orientation="Orientation.Vertical" Gap="0.5rem" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.SpaceBetween">
+        <RadzenStack Orientation="Orientation.Horizontal" Visible="!UseInlineSearch" Style="width: 100%">
+
+            @if (SupportsSearchText)
+            {
+                <RadzenAutoComplete @bind-Value="@filterViewModel.SearchText" Data="@searchSuggestions" Placeholder="@lang.GetValueOrDefault("datafilter_searchtextplaceholder")" LoadData="@LoadSearchSuggestions" Change="@OnSearchChanged" Style="flex:1" InputType="search" />
+            }
+
+            <RadzenDropDown @ref="addFilterDropdown"
+            TValue="DataFieldDefinition"
+            Data="filterViewModel.SearchFieldsDisplay"
+            TextProperty="Value"
+            ValueProperty="Key"
+            AllowFiltering="true"
+            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+            FilterDelay="100"
+            Placeholder="@lang.GetValueOrDefault("datafilter_addfilter")"
+            Change="@(value => AddFilter(value))" />
+        </RadzenStack>
+    </RadzenStack>
+}
+
+<DataFilterList @ref=_dataFilter Visible=@(!UseInlineSearch) OnChange="@OnDataFilterChange" FilterViewModel="filterViewModel" ODataExpressionGenerator="ODataExpressionGenerator" />
+
+<RadzenLabel>@string.Format(lang.GetValueOrDefault("grid_totalcount"), count)</RadzenLabel>
+
+<CustomRadzenDataGrid @ref="@gridRef"
+TItem="GridItem"
+Data="@items"
+Count="@count"
+LoadData="LoadData"
+AllowPaging="true"
+PagerPosition="PagerPosition.TopAndBottom"
+PageSize="50"
+AllowSorting="true"
+AllowFiltering="@(UseInlineSearch)"
+AllowColumnResize="true"
+Responsive="IsSmall"
+Density="@Density">
+    <Columns>
+        @if (formFields?.Any() == true)
+        {
+            @foreach (var formField in formFields)
+            {
+                <CustomRadzenDataGridColumn TItem="GridItem"
+                Property="@($"{nameof(GridItem.ListModel)}." + (formField.PropertyName))"
+                Type="@formField.PropertyType"
+                Title="@(lang.GetPropertyName(formField))"
+                Sortable="@formField.Sortable"
+                SortOrder="@(formField.DefaultSortDirection switch {SortDirection.Ascending => SortOrder.Ascending, SortDirection.Descending => SortOrder.Descending, _ => null})"
+                Filterable="@formField.Filterable">
+                    <Template Context="item">
+                        <DynamicField FormField="@item.ListModel.GetListForm()[formField.PropertyName]" ReadOnly="true" ViewModel="item.ListModel" CustomFormFieldTypes="CustomFormFieldTypes" />
+                    </Template>
+                </CustomRadzenDataGridColumn>
+            }
+            <RadzenDataGridColumn Visible="@GetActionsMenuVisibility()" TItem="GridItem" Property="Id" Title="@lang.GetValueOrDefault("actions")" TextAlign="TextAlign.Center" Sortable="false" Filterable="false">
+                <Template Context="item">
+                    <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25em">
+                        @foreach (var action in CustomRowActions)
+                        {
+                            <RadzenButton Click="@(args => @item.OnCustomAction(args, action))" MouseEnter="@(args => @item.OnCustomActionMouseEnter(args, action))" Icon="@action.Icon" Size="@MenuButtonSize" ButtonStyle="ButtonStyle.Base"></RadzenButton>
+                        }
+
+                        @if (CanCopy)
+                        {
+                            <RadzenButton Click="@item.OnCopyClick" MouseEnter="@item.OnCopyMouseEnter" Icon="content_copy" Size="@MenuButtonSize" ButtonStyle="ButtonStyle.Base"></RadzenButton>
+                        }
+                        @if (CanUpdate)
+                        {
+                            <RadzenButton Click="@item.OnEditClick" MouseEnter="@item.OnEditMouseEnter" Icon="mode_edit" Size="@MenuButtonSize" ButtonStyle="ButtonStyle.Base"></RadzenButton>
+                        }
+                        @if (CanView)
+                        {
+                            <RadzenButton Click="@item.OnViewClick" MouseEnter="@item.OnViewMouseEnter" Icon="visibility" Size="@MenuButtonSize" ButtonStyle="ButtonStyle.Base"></RadzenButton>
+                        }
+                        @if (CanDelete)
+                        {
+                            <RadzenButton Click="@item.OnDeleteClick" MouseEnter="@item.OnDeleteMouseEnter" Icon="delete" Size="@MenuButtonSize" ButtonStyle="ButtonStyle.Base"></RadzenButton>
+                        }
+                    </RadzenStack>
+                </Template>
+            </RadzenDataGridColumn>
+        }
+    </Columns>
+</CustomRadzenDataGrid>
+
+<MediaQuery Media="@Breakpoints.LargeUp" @bind-Matches="IsLarge" />
+<MediaQuery Media="@Breakpoints.SmallDown" @bind-Matches="IsSmall" />

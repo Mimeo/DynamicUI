@@ -1,0 +1,262 @@
+﻿@using CsvHelper
+@using CsvHelper.Configuration
+@using System.Collections
+@using System.Diagnostics
+@using System.Globalization
+@using System.Text
+@using Mimeo.DynamicUI.Blazor.Extensions
+
+@implements IDisposable
+
+@inject TaskRunningService taskRunningService
+
+<div class="@cssClass">
+    <div class="alert-danger mb-3" visible="@HasError">@ErrorMessage</div>
+    <div class="alert-default-info p-2 mb-3">@lang.GetValueOrDefault("importdialog_desc")</div>
+
+    <InputFile OnChange="@OnImportHandler" class="w-100 mb-3" />
+
+    @if (isImportRunning)
+    {
+        <RadzenProgressBar Value="importPercent" Max="1" ShowValue="false" Mode="@progressBarMode"  />
+        <span>@progressMessage</span>
+    }
+
+    <div class="col-sm-12">        
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="10px">
+            <RadzenButton Visible="@ShowCancelButton" Disabled="@taskRunning" Click="CancelEventHandler" ButtonStyle="ButtonStyle.Secondary" Text="@lang.GetValueOrDefault("cancel")" />
+        </RadzenStack>
+    </div>
+</div>
+@code {
+    [Parameter]
+    public IImportExportDataService ImportExportDataService { get; set; } = default!;
+
+    [Parameter]
+    public EventCallback<ImportEventArgs<object?>> OnImport { get; set; }
+
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+    [Parameter]
+    public string ErrorMessage { get; set; } = "";
+    private bool HasError => !string.IsNullOrWhiteSpace(ErrorMessage);
+
+    [Parameter]
+    public bool IsModal { get; set; }
+
+    [Parameter]
+    public bool ShowCancelButton { get; set; }
+
+    private string cssClass => IsModal ? "modal-wrapper" : "";
+
+    private bool isImportRunning;
+    private int importedCount;
+    private int estimatedTotalCount;
+    private double importPercent;
+    private TimeSpan importTimeElapsed;
+    private TimeSpan importTimeElapsedDuringLastImportReport; // Using the actual elapsed time results in a continually increasing estimate while we wait on the current batch
+    private TimeSpan estimatedTimeRemaining;
+    private ProgressBarMode progressBarMode => importedCount == 0 ? ProgressBarMode.Indeterminate : ProgressBarMode.Determinate;
+    private string progressMessage => string.Format(importedCount == 0 ? lang.GetValueOrDefault("importdialog_progress") : lang.GetValueOrDefault("importdialog_progresswithestimate"), importedCount, importTimeElapsed, estimatedTimeRemaining);
+    private bool taskRunning;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        taskRunningService.OnTaskRunningChanged += OnTaskRunningChanged;
+    }
+
+    private async Task CancelEventHandler()
+    {
+        await OnCancel.InvokeAsync();
+    }
+
+    private async Task OnImportHandler(InputFileChangeEventArgs e)
+    {
+        if (e.File.ContentType.Contains("csv", StringComparison.OrdinalIgnoreCase)) 
+        {
+            await ImportCSV(e);
+        }
+        else if (e.File.ContentType.Contains("json", StringComparison.OrdinalIgnoreCase)) 
+        {
+            await ImportJson(e);
+        }
+        else 
+        {
+            ErrorMessage = $"Unrecognized file type: {e.File.ContentType}";
+        }
+    }
+
+    private async Task ImportCSV(InputFileChangeEventArgs e)
+    {
+        ErrorMessage = string.Empty;
+
+        var configuration = new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                Encoding = Encoding.UTF8,
+                Delimiter = ",",
+                HasHeaderRecord = true
+            };
+
+        try
+        {
+            await using var stream = e.File.OpenReadStream(maxAllowedSize: long.MaxValue);
+
+            var stopwatch = new Stopwatch();
+
+            void refreshProgress()
+            {
+                importTimeElapsed = stopwatch.Elapsed;
+                StateHasChanged();
+
+                if (importedCount == 0)
+                {
+                    return;
+                }
+
+                // Getting an actual record count requires enumerating the entire stream,
+                // and we can only read through it once in this context
+                // Seeing the position in the stream makes for similar UX
+                importPercent = (double)stream.Position / (double)stream.Length;
+                if (importPercent == 0)
+                {
+                    return;
+                }
+
+                estimatedTotalCount = (int)(importedCount / importPercent);
+
+                var timePerImport = importTimeElapsedDuringLastImportReport / importedCount;
+                estimatedTimeRemaining = timePerImport * (estimatedTotalCount - importedCount);
+                StateHasChanged();
+            }
+
+            void onImportedCountChanged(int importedCount)
+            {
+                this.importedCount = importedCount;
+                importTimeElapsedDuringLastImportReport = stopwatch.Elapsed;
+                refreshProgress();
+            }
+
+            using var textReader = new StreamReader(stream, Encoding.UTF8);
+            using var csv = new CsvReader(textReader, configuration);
+
+            if (ImportExportDataService.CsvImportClassMapType is not null)
+            {
+                csv.Context.RegisterClassMap(ImportExportDataService.CsvImportClassMapType);
+            }
+
+            var data = csv.GetRecordsAsync(ImportExportDataService.GetImportModelType(ImportExportDataType.CSV));
+
+            var args = new ImportEventArgs<object?>(data);
+            args.OnImportedCountChanged += onImportedCountChanged;
+
+            var backgroundRefreshTimer = new Timer(_ => refreshProgress(), null, 0, 1000);
+            try
+            {
+                isImportRunning = true;
+                stopwatch.Start();
+
+                await taskRunningService.Run(() => OnImport.InvokeAsync(args));
+            }
+            finally
+            {
+                await backgroundRefreshTimer.DisposeAsync();
+                args.OnImportedCountChanged -= onImportedCountChanged;
+                stopwatch.Stop();
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
+    }
+
+    private async Task ImportJson(InputFileChangeEventArgs e)
+    {
+        ErrorMessage = string.Empty;
+
+        try
+        {
+            await using var stream = e.File.OpenReadStream(maxAllowedSize: long.MaxValue);
+
+            var stopwatch = new Stopwatch();
+
+            void refreshProgress()
+            {
+                importTimeElapsed = stopwatch.Elapsed;
+                StateHasChanged();
+
+                if (importedCount == 0)
+                {
+                    return;
+                }
+
+                // Getting an actual record count requires enumerating the entire stream,
+                // and we can only read through it once in this context
+                // Seeing the position in the stream makes for similar UX
+                importPercent = (double)stream.Position / (double)stream.Length;
+                if (importPercent == 0)
+                {
+                    return;
+                }
+
+                estimatedTotalCount = (int)(importedCount / importPercent);
+
+                var timePerImport = importTimeElapsedDuringLastImportReport / importedCount;
+                estimatedTimeRemaining = timePerImport * (estimatedTotalCount - importedCount);
+                StateHasChanged();
+            }
+
+            void onImportedCountChanged(int importedCount)
+            {
+                this.importedCount = importedCount;
+                importTimeElapsedDuringLastImportReport = stopwatch.Elapsed;
+                refreshProgress();
+            }
+
+            var modelType = ImportExportDataService.GetImportModelType(ImportExportDataType.JSON);
+            var listType = typeof(List<>).MakeGenericType(modelType);
+            var deserialized = (IList?)(await JsonSerializer.DeserializeAsync(stream, listType, ImportExportDataService.JsonSerializerOptions));
+            if (deserialized == null) 
+            {
+                ErrorMessage = "Failed to deserialize input file as json";
+                return;
+            }
+
+            var args = new ImportEventArgs<object?>(deserialized.Cast<object?>().ToAsyncEnumerable());
+            args.OnImportedCountChanged += onImportedCountChanged;
+
+            var backgroundRefreshTimer = new Timer(_ => refreshProgress(), null, 0, 1000);
+            try
+            {
+                isImportRunning = true;
+                stopwatch.Start();
+
+                await taskRunningService.Run(() => OnImport.InvokeAsync(args));
+            }
+            finally
+            {
+                await backgroundRefreshTimer.DisposeAsync();
+                args.OnImportedCountChanged -= onImportedCountChanged;
+                stopwatch.Stop();
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
+    }
+
+    private void OnTaskRunningChanged(bool isRunning)
+    {
+        taskRunning = isRunning;
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        taskRunningService.OnTaskRunningChanged -= OnTaskRunningChanged;
+    }
+}

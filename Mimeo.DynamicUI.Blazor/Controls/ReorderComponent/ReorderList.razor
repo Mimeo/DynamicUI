@@ -1,0 +1,51 @@
+﻿@typeparam TItem
+@inject TooltipService tooltipService
+
+<div ondragover="event.preventDefault()">
+    @if (Items != null && Items.Any())
+    {
+        var i = 0;
+
+        <RadzenStack Orientation="Orientation.Vertical" Gap="1em">
+            @foreach (var item in Items)
+            {
+                <DragItem TItem="TItem" 
+                TableMode="false"
+                Item="item"
+                CurrentIndex="i++" 
+                DragSourceIndex="oldIndex"
+                OnDrop="() => OnDrop(item)"
+                OnDragStart="() => OnDragStart(item)">
+                    <ItemTemplate>
+                        @if (DisplayReorderInterface)
+                        {
+                            <div style="margin-bottom: 0.5em;">
+                                <RadzenIcon Icon="reorder" MouseEnter="@(element => tooltipService.Open(element, lang["reordertable_dragtorearrange"], new TooltipOptions(){ Position = TooltipPosition.Bottom }))" Style="vertical-align: middle" Visible="true" />
+                                <RadzenButton Icon="arrow_upward" ButtonStyle="ButtonStyle.Light" Click="() => MoveUp(item)" />
+                                <RadzenButton Icon="arrow_downward" ButtonStyle="ButtonStyle.Light" Click="() => MoveDown(item)" />
+
+                                @if (ReorderInterfaceHeaderTemplate != null)
+                                {
+                                    @ReorderInterfaceHeaderTemplate(item)
+                                }
+                            </div>
+                        }
+
+                        @if (ItemTemplate != null)
+                        {
+                            @ItemTemplate(item)
+                        }
+                        else
+                        {
+                            <span>@(item?.ToString() ?? null)</span>
+                        }
+                    </ItemTemplate>
+                </DragItem>
+            }
+        </RadzenStack>
+    }
+    else if (EmptyTemplate != null)
+    {
+        @EmptyTemplate
+    }
+</div>

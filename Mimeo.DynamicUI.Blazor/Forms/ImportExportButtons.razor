@@ -1,0 +1,89 @@
+﻿@using Mimeo.DynamicUI.Blazor.Extensions
+
+@inject DialogService dialogService
+@inject TaskRunningService taskRunningService
+@inject IJSRuntime JSRuntime
+
+@{
+    RenderFragment exportFragment;
+    @if (ImportExportDataService.SupportedDataTypes.Count() > 1)
+    {
+        exportFragment = @<RadzenSplitButton Text="@lang.GetValueOrDefault("export")" Click="@(async args => await ExportData(!string.IsNullOrEmpty(args?.Value) ? Enum.Parse<ImportExportDataType>(args.Value) : ImportExportDataService.SupportedDataTypes.First()))">
+        <ChildContent>
+            @foreach (var dataType in ImportExportDataService.SupportedDataTypes) {
+            <RadzenSplitButtonItem Text="@dataType.ToString("F")" Value="@dataType.ToString("F")" />
+        }
+        </ChildContent>
+    </RadzenSplitButton>;
+    }
+    else
+    {
+        exportFragment = @<RadzenButton Text="@lang.GetValueOrDefault("export")" Click="@(async args => await ExportData(ImportExportDataService.SupportedDataTypes.Single()))"></RadzenButton>;
+    }
+    RenderFragment importFragment = @<RadzenButton Text="@lang.GetValueOrDefault("import")" Click="@(async args => await OpenImportDialogAsync())"></RadzenButton>;
+
+    @if (DisableImportExportRoleCheck)
+    {
+        @exportFragment
+        @importFragment
+    }
+    else
+    {
+        <AuthorizeView Roles="@ImportExportRole">
+            @exportFragment
+            @importFragment
+        </AuthorizeView>
+    }
+}
+
+@code {
+    [Parameter]
+    public IImportExportDataService ImportExportDataService { get; set; } = default!;
+
+    [Parameter]
+    public DataQuery? ExportFilter { get; set; }
+
+    [Parameter]
+    public string? ImportExportRole { get; set; } = "can_mass_import_and_export";
+
+    [Parameter]
+    public bool DisableImportExportRoleCheck { get; set; }
+
+    [Parameter]
+    public EventCallback OnImportComplete { get; set; }
+
+    private async Task ExportData(ImportExportDataType dataType)
+    {
+        if (ImportExportDataService == null)
+        {
+            throw new InvalidOperationException($"ImportExportDataService is required.");
+        }
+
+        await taskRunningService.Run(async () =>
+        {
+            var file = await ImportExportDataService.ExportData(dataType, ExportFilter ?? new DataQuery());
+
+            var extension = dataType.ToString("f").ToLower(); // This works for CSV and JSON. In the future we might need to tweak things.
+
+            var fileName = $"export-{DateTime.Now.ToString("o").Replace(":", "_")}.{extension}";
+            await JSRuntime.InvokeVoidAsync("exportHelpers.downloadFile", fileName, $"text/{extension}", file);
+        });
+    }
+
+    private async Task OpenImportDialogAsync()
+    {
+        if (ImportExportDataService == null)
+        {
+            throw new InvalidOperationException($"ImportExportDataService is required.");
+        }
+
+        var result = await dialogService.OpenImportDialogAsync(lang.GetValueOrDefault("importdialog_title"),
+            ImportExportDataService,
+            onImport: async args => await ImportExportDataService.ImportData(args));
+
+        if (result == true)
+        {
+            await OnImportComplete.InvokeAsync();
+        }
+    }
+}

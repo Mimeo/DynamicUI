@@ -1,0 +1,32 @@
+﻿div.data-filter-field {
+    display: inline-flex;
+    gap: 0;
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 3px 0;
+}
+
+    div.data-filter-field button.data-filter-field-primary {
+        align-items: center;
+        background-color: var(--rz-primary-lighter);
+        border: none;
+        color: var(--rz-on-primary-lighter);
+        display: flex;
+        gap: 0.25em;
+        flex: 1;
+    }
+
+    div.data-filter-field button.data-filter-field-secondary {
+        align-items: center;
+        background-color: var(--rz-primary-light);
+        border: none;
+        color: var(--rz-on-primary-light);
+        display: flex;
+        justify-content: center;
+        padding: 0;
+    }
+
+    .data-field-popup .data-field-popup-content {
+        display: flex;
+        flex-direction: column;
+    }

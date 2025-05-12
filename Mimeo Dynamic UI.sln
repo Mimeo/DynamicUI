@@ -1,0 +1,74 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34601.278
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C6BE560F-B786-4E6A-B529-377579860D15}"
+	ProjectSection(SolutionItems) = preProject
+		azure-pipelines.yml = azure-pipelines.yml
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mimeo.DynamicUI", "Mimeo.DynamicUI\Mimeo.DynamicUI.csproj", "{2C496CD9-C353-43BD-B418-43C2CED4815E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mimeo.DynamicUI.Blazor", "Mimeo.DynamicUI.Blazor\Mimeo.DynamicUI.Blazor.csproj", "{BCD38C25-A71C-4BFF-9323-3FEA2D40F402}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mimeo.DynamicUI.Blazor.Tests", "Mimeo.DynamicUI.Blazor.Tests\Mimeo.DynamicUI.Blazor.Tests.csproj", "{ADE6E895-33C2-462E-83AD-523626C2FD3A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mimeo.DynamicUI.Tests", "Mimeo.DynamicUI.Tests\Mimeo.DynamicUI.Tests.csproj", "{87A1811A-4F5B-49D5-9FEA-33E3084A04D1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Mimeo.DynamicUI.Demo", "Mimeo.DynamicUI.Demo", "{2553CB95-D1D3-4A74-8E41-3481E4C67DBF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mimeo.DynamicUI.Demo.Server", "Mimeo.DynamicUI.Demo\Mimeo.DynamicUI.Demo.Server\Mimeo.DynamicUI.Demo.Server.csproj", "{5D2D73C3-F4C7-404F-AE4B-621179086BD5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mimeo.DynamicUI.Demo.Client", "Mimeo.DynamicUI.Demo\Mimeo.DynamicUI.Demo.Client\Mimeo.DynamicUI.Demo.Client.csproj", "{1E623729-3EEC-4326-973D-E8EA6BFA7C6F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mimeo.DynamicUI.Demo.Shared", "Mimeo.DynamicUI.Demo\Mimeo.DynamicUI.Demo.Shared\Mimeo.DynamicUI.Demo.Shared.csproj", "{53F61699-5BAB-46CB-AE3E-15282013E171}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2C496CD9-C353-43BD-B418-43C2CED4815E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2C496CD9-C353-43BD-B418-43C2CED4815E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2C496CD9-C353-43BD-B418-43C2CED4815E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2C496CD9-C353-43BD-B418-43C2CED4815E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BCD38C25-A71C-4BFF-9323-3FEA2D40F402}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BCD38C25-A71C-4BFF-9323-3FEA2D40F402}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BCD38C25-A71C-4BFF-9323-3FEA2D40F402}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BCD38C25-A71C-4BFF-9323-3FEA2D40F402}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ADE6E895-33C2-462E-83AD-523626C2FD3A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ADE6E895-33C2-462E-83AD-523626C2FD3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ADE6E895-33C2-462E-83AD-523626C2FD3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ADE6E895-33C2-462E-83AD-523626C2FD3A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{87A1811A-4F5B-49D5-9FEA-33E3084A04D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{87A1811A-4F5B-49D5-9FEA-33E3084A04D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{87A1811A-4F5B-49D5-9FEA-33E3084A04D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{87A1811A-4F5B-49D5-9FEA-33E3084A04D1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5D2D73C3-F4C7-404F-AE4B-621179086BD5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D2D73C3-F4C7-404F-AE4B-621179086BD5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D2D73C3-F4C7-404F-AE4B-621179086BD5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D2D73C3-F4C7-404F-AE4B-621179086BD5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1E623729-3EEC-4326-973D-E8EA6BFA7C6F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1E623729-3EEC-4326-973D-E8EA6BFA7C6F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1E623729-3EEC-4326-973D-E8EA6BFA7C6F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1E623729-3EEC-4326-973D-E8EA6BFA7C6F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{53F61699-5BAB-46CB-AE3E-15282013E171}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{53F61699-5BAB-46CB-AE3E-15282013E171}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{53F61699-5BAB-46CB-AE3E-15282013E171}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{53F61699-5BAB-46CB-AE3E-15282013E171}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{5D2D73C3-F4C7-404F-AE4B-621179086BD5} = {2553CB95-D1D3-4A74-8E41-3481E4C67DBF}
+		{1E623729-3EEC-4326-973D-E8EA6BFA7C6F} = {2553CB95-D1D3-4A74-8E41-3481E4C67DBF}
+		{53F61699-5BAB-46CB-AE3E-15282013E171} = {2553CB95-D1D3-4A74-8E41-3481E4C67DBF}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B3585010-DB8B-4E1E-8B09-12530C3A7E14}
+	EndGlobalSection
+EndGlobal

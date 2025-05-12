@@ -1,0 +1,145 @@
+﻿@using Mimeo.DynamicUI.Blazor.Extensions
+@inject IDateTimeConverter dateTimeConverter
+
+@if (ReadOnly)
+{
+    <span>@DisplayValueStringDateOnly</span>
+}
+else
+{
+    <RadzenDropDown TValue="DateFilterOptionItem" Data="@_relativeOptions" @bind-Value="SelectedDateFilterOption" TextProperty="Label" Change="@(val => OnOptionChange((DateFilterOptionItem)val))" />
+
+    @if (Value?.Option == DateFilterOption.XDaysFromNow)
+    {
+        <RadzenNumeric TValue="int" Value="@(Value?.DaysToAdd ?? 0)" Change="@(daysToAdd => OnDaysToAddChange(daysToAdd))" class="date-filter-input" />
+    }
+    else if (Value?.Option == DateFilterOption.Exact)
+    {
+        <RadzenDatePicker TValue="DateTime?" Id="@Id" Value="@DisplayValue" Change="@OnExactDateChange" ShowTime="false" DateFormat="@_formatDateOnly" />
+    }
+}
+
+@code {
+    private IEnumerable<DateFilterOptionItem>? _relativeOptions;
+    private string? _formatDateOnly;
+
+    [Parameter]
+    public DateFilter? Value { get; set; }
+
+    [Parameter]
+    public EventCallback<DateFilter?> ValueChanged { get; set; }
+
+    [Parameter]
+    public bool ReadOnly { get; set; }
+
+    [Parameter]
+    public string? Id { get; set; }
+
+    [Parameter]
+    public DateDisplayMode DisplayMode { get; set; }
+
+    private string DisplayValueStringDateOnly => DisplayValue?.ToString(_formatDateOnly) ?? "";
+
+    private DateTime? DisplayValue
+    {
+        get
+        {
+            if (!Value!.Date.HasValue)
+            {
+                return null;
+            }
+
+            return dateTimeConverter.UtcToDisplay(Value!.Date.Value, DisplayMode);
+        }
+    }
+
+    private DateFilterOptionItem? SelectedDateFilterOption
+    {
+        get => _selectedDateFilterOption;
+        set
+        {
+            _selectedDateFilterOption = value;
+            if (Value != null)
+            {
+                Value = Value with
+                {
+                    Option = value?.Option ?? default
+                };
+            }
+        }
+    }
+    private DateFilterOptionItem? _selectedDateFilterOption;
+
+    protected override void OnInitialized()
+    {
+        _relativeOptions = Enum.GetValues(typeof(DateFilterOption))
+            .Cast<DateFilterOption>()
+            .Select(o => new DateFilterOptionItem
+            {
+                Option = o,
+                Label = string.Format(lang.GetValueOrDefault("datefilteroption_" + o.ToString("f").ToLower()), "Specific")
+            });
+
+        _formatDateOnly = lang.GetValueOrDefault("datetimeformat_dateonly");
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (Value is null)
+        {
+            Value = new DateFilter(DateFilterOption.Today);
+        }
+
+        _selectedDateFilterOption = _relativeOptions!.Single(o => o.Option == Value.Option);
+    }
+
+    private async Task OnOptionChange(DateFilterOptionItem item)
+    {
+        Value = Value! with
+        {
+            Option = item.Option,
+            DaysToAdd = 0
+        };
+
+        if (ValueChanged.HasDelegate)
+        {
+            await ValueChanged.InvokeAsync(Value);
+        }
+
+        await OnExactDateChange(Value.ToDateTime());
+    }
+
+    private async Task OnDaysToAddChange(int daysToAdd)
+    {
+        Value = Value! with
+        {
+            DaysToAdd = daysToAdd
+        };
+
+        if (ValueChanged.HasDelegate)
+        {
+            await ValueChanged.InvokeAsync(Value);
+        }
+
+        await OnExactDateChange(Value.ToDateTime());
+    }
+
+    private async Task OnExactDateChange(DateTime? dateTime)
+    {
+        Value = Value! with
+        {
+            Date = dateTime.HasValue ? dateTimeConverter.DisplayToUtc(dateTime.Value, DisplayMode) : null
+        };
+
+        if (ValueChanged.HasDelegate)
+        {
+            await ValueChanged.InvokeAsync(Value);
+        }
+    }
+
+    protected class DateFilterOptionItem
+    {
+        public DateFilterOption Option { get; set; }
+        public required string Label { get; set; }
+    }
+}

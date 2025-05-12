@@ -1,0 +1,8 @@
+﻿@if (Visible && FilterViewModel != null && FilterViewModel.Filters.Any())
+{
+    <div class="filters">
+        @foreach (var filter in FilterViewModel.Filters.Where(f => f is DataQueryFilter).Cast<DataQueryFilter>()) {
+            <DataFilterField Filter="@filter" OnDelete="@(() => OnFilterDelete(filter))" OnChange="@(() => OnFilterChange(filter))" ODataExpressionGenerator="ODataExpressionGenerator" />
+        }
+    </div>
+}

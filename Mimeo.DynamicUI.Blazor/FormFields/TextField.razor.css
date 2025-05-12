@@ -1,0 +1,18 @@
+﻿.hacker-box {
+    background-color: #000000;
+    border: none;
+    box-sizing: border-box;
+    color: #00ff0a;
+    display: block;
+    font-family: 'IBM Plex Mono';
+    min-height: 40em;
+    padding: 6px 8px;
+    resize: none;
+    width: 100%;
+}
+
+.monaco-container {
+    height: 300px;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: .25rem;
+}

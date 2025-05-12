@@ -1,0 +1,22 @@
+﻿@using System.Collections
+@using static Mimeo.DynamicUI.SelectFormFieldDefinition
+@inherits FormFieldBase<List<string>>
+
+@if (ReadOnly && Items != null)
+{
+    <span>@(string.Join(", ", Items.Where(i => Value?.Contains(i.Value) ?? false).Select(i => i.Name ?? i.Value)))</span>
+}
+else if (Items != null)
+{
+    <RadzenDropDown id="@Id" Data="Items" TextProperty="Name" ValueProperty="Value" @bind-Value="@Value" Disabled="@(ReadOnly || Disabled)" Multiple="true" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+}
+else if (SelectDefinition?.ItemSource != null)
+{
+    <DataSourceDropDownGrid Id="@Id" @bind-Values="Value" ItemSource="@SelectDefinition?.ItemSource" NameField="@SelectDefinition?.ItemSourceNameField" ValueField="@SelectDefinition?.ItemSourceValueField" ItemSourceDataQuery="@SelectDefinition?.ItemSourceDataQuery" Multiple="true" Disabled="ReadOnly" />
+}
+
+@code {
+    private MultiSelectDropDownFormFieldDefinition? SelectDefinition => (MultiSelectDropDownFormFieldDefinition?)Definition;
+
+    private List<ListItem>? Items => SelectDefinition?.Items?.Select(i => new ListItem(lang[i.Name], i.Value))?.ToList();
+}

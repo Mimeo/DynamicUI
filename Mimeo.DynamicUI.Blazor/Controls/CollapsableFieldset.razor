@@ -1,0 +1,45 @@
+﻿<RadzenFieldset Visible="Visible" Style="width:100%">
+    <HeaderTemplate>
+        <div style="display:flex;align-items:center;">
+            <RadzenIcon Icon="@(Collapsed ? "arrow_right" : "arrow_drop_down")" @onclick="@(() => Collapsed = !Collapsed)" Style="display:inline;cursor:pointer;" />
+            @if (HeaderTemplate != null)
+            {
+                @HeaderTemplate
+            }
+        </div>
+    </HeaderTemplate>
+    <ChildContent>
+        @if (!Collapsed && ChildContent != null)
+        {
+            @ChildContent
+        }
+    </ChildContent>
+</RadzenFieldset>
+
+@code {
+    #pragma warning disable BL0007 // Component parameters should be auto properties
+    [Parameter]
+    public bool Visible { get; set; } = true;
+
+    [Parameter]
+    public bool Collapsed
+    {
+        get
+        {
+            return _collapsed ?? false;
+        }
+        set
+        {
+            _collapsed = value;
+        }
+    }
+    private bool? _collapsed;
+
+    [Parameter]
+    public RenderFragment? HeaderTemplate { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+#pragma warning restore BL0007
+}
