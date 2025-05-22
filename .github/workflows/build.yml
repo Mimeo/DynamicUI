@@ -1,19 +1,16 @@
-# This workflow will build a .NET project
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
-
-name: .NET
+name: Build
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "**" ]
   pull_request:
     branches: [ "main" ]
+  create:
+    tags: [ "*" ]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v4
       with:        
@@ -60,4 +57,29 @@ jobs:
 
     - name: Test
       run: dotnet test --no-build --verbosity normal -c Release
-      
+
+  publish-github:
+    needs: build
+    runs-on: ubuntu-latest
+
+    # Only run for branches (no PRs or tags)
+    if: github.event_name != 'pull_request' && github.event_name != 'create'
+
+    steps:
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+
+    - name: Download artifacts
+      uses: actions/download-artifact@v2
+      with:
+        name: nuget
+        path: nuget
+
+    - name: Add Github Packages source
+      run: dotnet nuget add source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json --name github --username ${{ github.repository_owner }} --password ${{ github.token }} --store-password-in-clear-text
+
+    - name: Upload Packages
+      run: dotnet nuget push ./nuget/*.nupkg --source github --skip-duplicate
