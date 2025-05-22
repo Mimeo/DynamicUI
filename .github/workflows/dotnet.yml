@@ -25,15 +25,20 @@ jobs:
         dotnet-version: 8.0.x
 
     - name: Install GitVersion
-      uses: gittools/actions/gitversion/setup@v3.2.1
-      with:
-        versionSpec: '5.2.x'
+      run: dotnet tool install GitVersion.Tool --global --version 5.*
 
-    - name: Determine Version
-      id: gitversion # step id used as a reference for output values
-      uses: gittools/actions/gitversion/execute@v3.2.1
-      with:
-        useConfigFile: true
+    - name: GitVersion
+      id: gitversion
+      run: dotnet-gitversion -output file -outputfile version_info.json
+
+    - name: Grab version
+      run: |  
+          VERSION=$(jq -r '.MajorMinorPatch' version_info.json)
+          BRANCH_NAME=$(jq -r '.EscapedBranchName' version_info.json)
+          PRE_RELEASE_NUMBER=$(jq -r '.PreReleaseNumber' version_info.json)          
+          FINAL_VERSION="${VERSION}-${BRANCH_NAME}.${PRE_RELEASE_NUMBER}"
+          echo "semver=$FINAL_VERSION" >> "$GITHUB_ENV"
+          echo "semver_prd=$VERSION" >> "$GITHUB_ENV"
 
     - name: Restore dependencies
       run: dotnet restore
@@ -42,10 +47,10 @@ jobs:
       run: dotnet build --no-restore -c Release
 
     - name: Pack DynamicUI
-      run: dotnet pack Mimeo.DynamicUI/Mimeo.DynamicUI.csproj --no-restore -c Release -o nuget -p:Version=${{ steps.gitversion.outputs.semVer }}
+      run: dotnet pack Mimeo.DynamicUI/Mimeo.DynamicUI.csproj --no-restore -c Release -o nuget -p:Version=${{ semver }}
 
     - name: Pack DynamicUI.Blazor
-      run: dotnet pack Mimeo.DynamicUI.Blazor/Mimeo.DynamicUI.Blazor.csproj --no-restore -c Release -o nuget -p:Version=${{ steps.gitversion.outputs.semVer }}
+      run: dotnet pack Mimeo.DynamicUI.Blazor/Mimeo.DynamicUI.Blazor.csproj --no-restore -c Release -o nuget -p:Version=${{ semver }}
     
     - name: Upload nuget packages as artifacts
       uses: actions/upload-artifact@v4
