@@ -5,7 +5,7 @@ VisualStudioVersion = 17.8.34601.278
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C6BE560F-B786-4E6A-B529-377579860D15}"
 	ProjectSection(SolutionItems) = preProject
-		azure-pipelines.yml = azure-pipelines.yml
+		GitVersion.yml = GitVersion.yml
 		README.md = README.md
 	EndProjectSection
 EndProject
@@ -24,6 +24,13 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mimeo.DynamicUI.Demo.Client", "Mimeo.DynamicUI.Demo\Mimeo.DynamicUI.Demo.Client\Mimeo.DynamicUI.Demo.Client.csproj", "{1E623729-3EEC-4326-973D-E8EA6BFA7C6F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mimeo.DynamicUI.Demo.Shared", "Mimeo.DynamicUI.Demo\Mimeo.DynamicUI.Demo.Shared\Mimeo.DynamicUI.Demo.Shared.csproj", "{53F61699-5BAB-46CB-AE3E-15282013E171}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{621C1A0A-46D1-4108-AEB3-6403F58F229E}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\dotnet.yml = .github\workflows\dotnet.yml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -67,6 +74,7 @@ Global
 		{5D2D73C3-F4C7-404F-AE4B-621179086BD5} = {2553CB95-D1D3-4A74-8E41-3481E4C67DBF}
 		{1E623729-3EEC-4326-973D-E8EA6BFA7C6F} = {2553CB95-D1D3-4A74-8E41-3481E4C67DBF}
 		{53F61699-5BAB-46CB-AE3E-15282013E171} = {2553CB95-D1D3-4A74-8E41-3481E4C67DBF}
+		{621C1A0A-46D1-4108-AEB3-6403F58F229E} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B3585010-DB8B-4E1E-8B09-12530C3A7E14}
