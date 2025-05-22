@@ -23,7 +23,7 @@ jobs:
     # workaround for gitversion issue (https://github.com/GitTools/actions/issues/1576#issuecomment-2873222058)
     - name: Set git safe.directory to SourcesDirectory
       shell: bash
-      run: git config --global --add safe.directory "${GITHUB_WORKSPACE}"
+      run: git config --global --add safe.directory "*"
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
