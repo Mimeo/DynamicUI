@@ -18,6 +18,12 @@ jobs:
     - uses: actions/checkout@v4
       with:        
         fetch-depth: 0
+        persistCredentials: true # workaround for gitversion issue (https://github.com/GitTools/actions/issues/1576#issuecomment-2873222058)
+
+    # workaround for gitversion issue (https://github.com/GitTools/actions/issues/1576#issuecomment-2873222058)
+    - name: Set git safe.directory to SourcesDirectory
+      shell: bash
+      run: git config --global --add safe.directory "${GITHUB_WORKSPACE}"
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
@@ -28,11 +34,6 @@ jobs:
       uses: gittools/actions/gitversion/setup@v3.2.1
       with:
         versionSpec: '6.3.x'
-
-    # workaround for gitversion issue (https://github.com/GitTools/actions/issues/1576#issuecomment-2846264771)
-    - name: libgit2sharp_fix
-      shell: bash
-      run: echo -en "[safe]\n        directory = ${GITHUB_WORKSPACE}\n" >> "${HOME}/.gitconfig"
 
     - name: Determine Version
       id: gitversion # step id used as a reference for output values
