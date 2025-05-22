@@ -1,0 +1,85 @@
+name: Build
+
+on:
+  push:
+    branches: [ "**" ]
+  pull_request:
+    branches: [ "main" ]
+  create:
+    tags: [ "*" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:        
+        fetch-depth: 0
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+
+    - name: Install GitVersion
+      run: dotnet tool install GitVersion.Tool --global --version 5.*
+
+    - name: GitVersion
+      id: gitversion
+      run: dotnet-gitversion -output file -outputfile version_info.json
+
+    - name: Grab version
+      run: |  
+          VERSION=$(jq -r '.MajorMinorPatch' version_info.json)
+          BRANCH_NAME=$(jq -r '.EscapedBranchName' version_info.json)
+          PRE_RELEASE_NUMBER=$(jq -r '.PreReleaseNumber' version_info.json)          
+          FINAL_VERSION="${VERSION}-${BRANCH_NAME}.${PRE_RELEASE_NUMBER}"
+          echo "semver=$FINAL_VERSION" >> "$GITHUB_ENV"
+          echo "semver_prd=$VERSION" >> "$GITHUB_ENV"
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build --no-restore -c Release
+
+    - name: Pack DynamicUI
+      run: dotnet pack Mimeo.DynamicUI/Mimeo.DynamicUI.csproj --no-restore -c Release -o nuget -p:Version=$semver
+
+    - name: Pack DynamicUI.Blazor
+      run: dotnet pack Mimeo.DynamicUI.Blazor/Mimeo.DynamicUI.Blazor.csproj --no-restore -c Release -o nuget -p:Version=$semver
+    
+    - name: Upload nuget packages as artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: nuget
+        path: nuget
+
+    - name: Test
+      run: dotnet test --no-build --verbosity normal -c Release
+
+  publish-github:
+    needs: build
+    runs-on: ubuntu-latest
+
+    # Only run for branches (no PRs or tags)
+    if: github.event_name != 'pull_request' && github.event_name != 'create'
+
+    steps:
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+
+    - name: Download artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: nuget
+        path: nuget
+
+    - name: Add Github Packages source
+      run: dotnet nuget add source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json --name github --username ${{ github.repository_owner }} --password ${{ github.token }} --store-password-in-clear-text
+
+    - name: Upload Packages
+      run: dotnet nuget push ./nuget/*.nupkg --source github --skip-duplicate
