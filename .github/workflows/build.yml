@@ -30,7 +30,7 @@ jobs:
 
     - name: Grab version
       run: |  
-          SEMVER=$(jq -r '.SemBer' version_info.json)
+          SEMVER=$(jq -r '.SemVer' version_info.json)
           echo "semver=SEMVER" >> "$GITHUB_ENV"
 
     - name: Restore dependencies
