@@ -30,12 +30,8 @@ jobs:
 
     - name: Grab version
       run: |  
-          VERSION=$(jq -r '.MajorMinorPatch' version_info.json)
-          BRANCH_NAME=$(jq -r '.EscapedBranchName' version_info.json)
-          PRE_RELEASE_NUMBER=$(jq -r '.PreReleaseNumber' version_info.json)          
-          FINAL_VERSION="${VERSION}-${BRANCH_NAME}.${PRE_RELEASE_NUMBER}"
-          echo "semver=$FINAL_VERSION" >> "$GITHUB_ENV"
-          echo "semver_prd=$VERSION" >> "$GITHUB_ENV"
+          SEMVER=$(jq -r '.SemVer' version_info.json)
+          echo "semver=$SEMVER" >> "$GITHUB_ENV"
 
     - name: Restore dependencies
       run: dotnet restore
