@@ -103,5 +103,5 @@ jobs:
 
     - name: Upload Packages
       env:
-        NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        NUGET_API_KEY: ${{ secrets.NUGET_MIMEO_PUBLISH_KEY }}
       run: dotnet nuget push ./nuget/*.nupkg --source https://api.nuget.org/v3/index.json --skip-duplicate --api-key $NUGET_API_KEY
