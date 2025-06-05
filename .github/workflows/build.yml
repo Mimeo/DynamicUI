@@ -31,7 +31,7 @@ jobs:
     - name: Grab version
       run: |  
           SEMVER=$(jq -r '.SemVer' version_info.json)
-          echo "semver=SEMVER" >> "$GITHUB_ENV"
+          echo "semver=$SEMVER" >> "$GITHUB_ENV"
 
     - name: Restore dependencies
       run: dotnet restore
