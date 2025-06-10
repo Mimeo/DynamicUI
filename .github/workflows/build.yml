@@ -79,3 +79,28 @@ jobs:
 
     - name: Upload Packages
       run: dotnet nuget push ./nuget/*.nupkg --source github --skip-duplicate
+        
+  publish-nuget:
+    needs: build
+    runs-on: ubuntu-latest
+
+    # Only run for tags being created
+    if: github.event_name == 'create' && startsWith(github.ref, 'refs/tags/')
+
+    steps:
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+
+    - name: Download artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: nuget
+        path: nuget
+
+    - name: Upload Packages
+      env:
+        NUGET_API_KEY: ${{ secrets.NUGET_MIMEO_PUBLISH_KEY }}
+      run: dotnet nuget push ./nuget/*.nupkg --source https://api.nuget.org/v3/index.json --skip-duplicate --api-key $NUGET_API_KEY
