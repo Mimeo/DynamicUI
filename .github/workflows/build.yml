@@ -5,8 +5,6 @@ on:
     branches: [ "**" ]
   pull_request:
     branches: [ "main" ]
-  create:
-    tags: [ "*" ]
 
 jobs:
   build:
@@ -84,8 +82,8 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
 
-    # Only run for tags being created
-    if: github.event_name == 'create' && startsWith(github.ref, 'refs/tags/')
+    # Only run for main branch
+    if: github.ref == 'refs/heads/main'
 
     steps:
 
