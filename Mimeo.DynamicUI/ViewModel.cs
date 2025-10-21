@@ -336,7 +336,7 @@ namespace Mimeo.DynamicUI
 
         public FormFieldDefinition ReorderableSectionList<T>(Expression<Func<List<T>>> @for, bool readOnly = false, bool sortable = true, bool collapsed = false, SortDirection defaultSort = SortDirection.None, bool filterable = true, string? customLanguageKey = null, Func<T>? newItemCreator = null)
         {
-            return new ListFieldDefinition<T>(FormFieldType.SectionList, @for)
+            return new ListFieldDefinition<T>(FormFieldType.ReorderableSectionList, @for)
             {
                 ReadOnly = readOnly,
                 Sortable = sortable,
@@ -349,7 +349,7 @@ namespace Mimeo.DynamicUI
 
         public FormFieldDefinition ReorderableSectionList<TViewModel>(Expression<Func<List<TViewModel>>> @for, Func<TViewModel, FormFieldDefinition> headerField, bool readOnly = false, bool sortable = true, bool collapsed = false, SortDirection defaultSort = SortDirection.None, bool filterable = true, string? customLanguageKey = null, Func<TViewModel>? newItemCreator = null)
         {
-            return new ListFieldDefinition<TViewModel>(FormFieldType.SectionList, @for)
+            return new ListFieldDefinition<TViewModel>(FormFieldType.ReorderableSectionList, @for)
             {
                 ReadOnly = readOnly,
                 Sortable = sortable,
