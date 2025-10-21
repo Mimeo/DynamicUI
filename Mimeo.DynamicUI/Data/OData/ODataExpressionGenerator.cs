@@ -120,7 +120,12 @@ namespace Mimeo.DynamicUI.Data.OData
                         DataFilterOperator.GreaterThan,
                         DataFilterOperator.GreaterThanOrEquals
                     };
+#pragma warning disable CS0618 // Type or member is obsolete (Justification: Backwards compatibility)
                 case FormFieldType.List:
+#pragma warning restore CS0618 // Type or member is obsolete
+                case FormFieldType.Table:
+                case FormFieldType.SectionList:
+                case FormFieldType.ReorderableSectionList:
                     var sampleItem = (filter.FormFieldDefinition as IListFieldDefinition)?.CreateNewItem();
                     if (sampleItem is ViewModel)
                     {

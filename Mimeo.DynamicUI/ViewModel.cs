@@ -1,11 +1,19 @@
 ﻿using Mimeo.DynamicUI.Data;
 using Mimeo.DynamicUI.Extensions;
+using System.ComponentModel;
 using System.Linq.Expressions;
 
 namespace Mimeo.DynamicUI
 {
-    public abstract class ViewModel
+    public abstract class ViewModel : INotifyPropertyChanged
     {
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        protected void RaisePropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
         public virtual object? GetValue(FormFieldDefinition field)
         {
             var property = this.GetType().GetProperty(field.PropertyName);
@@ -26,7 +34,8 @@ namespace Mimeo.DynamicUI
             }
 
             property.SetValue(this, value);
-            field?.OnValueChanged?.Invoke(value);
+            field.OnValueChanged?.Invoke(value);
+            RaisePropertyChanged(field.PropertyName);
         }
 
         /// <summary>
@@ -109,7 +118,10 @@ namespace Mimeo.DynamicUI
         /// <summary>
         /// Gets fields that should show up in an edit form for a single view model
         /// </summary>
-        protected abstract IEnumerable<FormFieldDefinition> GetEditFormFields();
+        protected virtual IEnumerable<FormFieldDefinition> GetEditFormFields()
+        {
+            return Enumerable.Empty<FormFieldDefinition>();
+        }
 
         public FormFieldDefinition FormField(FormFieldType type, Expression<Func<object?>> @for, bool readOnly = false, bool sortable = true, bool collapsed = false, SortDirection defaultSort = SortDirection.None, bool filterable = true, string? customLanguageKey = null)
         {
@@ -237,6 +249,7 @@ namespace Mimeo.DynamicUI
             }.WithCustomLanguageKey(customLanguageKey);
         }
 
+        [Obsolete("Use Table(...), SectionList(...), or ReorderableSectionList(...) instead")]
         public FormFieldDefinition FormField<T>(Expression<Func<List<T>>> @for, bool readOnly = false, bool sortable = true, bool collapsed = false, SortDirection defaultSort = SortDirection.None, bool filterable = true, string? customLanguageKey = null, Func<T>? newItemCreator = null, ListFieldPresentationMode? mode = null)
         {
             return new ListFieldDefinition<T>(@for)
@@ -251,6 +264,7 @@ namespace Mimeo.DynamicUI
             }.WithCustomLanguageKey(customLanguageKey);
         }
 
+        [Obsolete("Use Table(...), SectionList(...), or ReorderableSectionList(...) instead")]
         public FormFieldDefinition FormField<TViewModel>(Expression<Func<List<TViewModel>>> @for, Func<TViewModel, FormFieldDefinition> headerField, bool readOnly = false, bool sortable = true, bool collapsed = false, SortDirection defaultSort = SortDirection.None, bool filterable = true, string? customLanguageKey = null, Func<TViewModel>? newItemCreator = null, ListFieldPresentationMode? mode = null)
         {
             return new ListFieldDefinition<TViewModel>(@for)
@@ -262,6 +276,87 @@ namespace Mimeo.DynamicUI
                 Filterable = filterable,
                 NewItemCreator = newItemCreator,
                 PresentationMode = mode ?? ListFieldPresentationMode.ReorderableSectionList,
+                HeaderField = headerField
+            }.WithCustomLanguageKey(customLanguageKey);
+        }
+
+        public FormFieldDefinition Table<T>(Expression<Func<List<T>>> @for, bool readOnly = false, bool sortable = true, bool collapsed = false, SortDirection defaultSort = SortDirection.None, bool filterable = true, string? customLanguageKey = null, Func<T>? newItemCreator = null)
+        {
+            return new ListFieldDefinition<T>(FormFieldType.Table, @for)
+            {
+                ReadOnly = readOnly,
+                Sortable = sortable,
+                Collapsed = collapsed,
+                DefaultSortDirection = defaultSort,
+                Filterable = filterable,
+                NewItemCreator = newItemCreator
+            }.WithCustomLanguageKey(customLanguageKey);
+        }
+
+        public FormFieldDefinition Table<TViewModel>(Expression<Func<List<TViewModel>>> @for, Func<TViewModel, FormFieldDefinition> headerField, bool readOnly = false, bool sortable = true, bool collapsed = false, SortDirection defaultSort = SortDirection.None, bool filterable = true, string? customLanguageKey = null, Func<TViewModel>? newItemCreator = null)
+        {
+            return new ListFieldDefinition<TViewModel>(FormFieldType.Table, @for)
+            {
+                ReadOnly = readOnly,
+                Sortable = sortable,
+                Collapsed = collapsed,
+                DefaultSortDirection = defaultSort,
+                Filterable = filterable,
+                NewItemCreator = newItemCreator,
+                HeaderField = headerField
+            }.WithCustomLanguageKey(customLanguageKey);
+        }
+
+        public FormFieldDefinition SectionList<T>(Expression<Func<List<T>>> @for, bool readOnly = false, bool sortable = true, bool collapsed = false, SortDirection defaultSort = SortDirection.None, bool filterable = true, string? customLanguageKey = null, Func<T>? newItemCreator = null)
+        {
+            return new ListFieldDefinition<T>(FormFieldType.SectionList, @for)
+            {
+                ReadOnly = readOnly,
+                Sortable = sortable,
+                Collapsed = collapsed,
+                DefaultSortDirection = defaultSort,
+                Filterable = filterable,
+                NewItemCreator = newItemCreator
+            }.WithCustomLanguageKey(customLanguageKey);
+        }
+
+        public FormFieldDefinition SectionList<TViewModel>(Expression<Func<List<TViewModel>>> @for, Func<TViewModel, FormFieldDefinition> headerField, bool readOnly = false, bool sortable = true, bool collapsed = false, SortDirection defaultSort = SortDirection.None, bool filterable = true, string? customLanguageKey = null, Func<TViewModel>? newItemCreator = null)
+        {
+            return new ListFieldDefinition<TViewModel>(FormFieldType.SectionList, @for)
+            {
+                ReadOnly = readOnly,
+                Sortable = sortable,
+                Collapsed = collapsed,
+                DefaultSortDirection = defaultSort,
+                Filterable = filterable,
+                NewItemCreator = newItemCreator,
+                HeaderField = headerField
+            }.WithCustomLanguageKey(customLanguageKey);
+        }
+
+        public FormFieldDefinition ReorderableSectionList<T>(Expression<Func<List<T>>> @for, bool readOnly = false, bool sortable = true, bool collapsed = false, SortDirection defaultSort = SortDirection.None, bool filterable = true, string? customLanguageKey = null, Func<T>? newItemCreator = null)
+        {
+            return new ListFieldDefinition<T>(FormFieldType.SectionList, @for)
+            {
+                ReadOnly = readOnly,
+                Sortable = sortable,
+                Collapsed = collapsed,
+                DefaultSortDirection = defaultSort,
+                Filterable = filterable,
+                NewItemCreator = newItemCreator
+            }.WithCustomLanguageKey(customLanguageKey);
+        }
+
+        public FormFieldDefinition ReorderableSectionList<TViewModel>(Expression<Func<List<TViewModel>>> @for, Func<TViewModel, FormFieldDefinition> headerField, bool readOnly = false, bool sortable = true, bool collapsed = false, SortDirection defaultSort = SortDirection.None, bool filterable = true, string? customLanguageKey = null, Func<TViewModel>? newItemCreator = null)
+        {
+            return new ListFieldDefinition<TViewModel>(FormFieldType.SectionList, @for)
+            {
+                ReadOnly = readOnly,
+                Sortable = sortable,
+                Collapsed = collapsed,
+                DefaultSortDirection = defaultSort,
+                Filterable = filterable,
+                NewItemCreator = newItemCreator,
                 HeaderField = headerField
             }.WithCustomLanguageKey(customLanguageKey);
         }
