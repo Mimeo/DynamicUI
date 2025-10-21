@@ -428,7 +428,7 @@ public partial class ODataGrid
     }
     private bool GetActionsMenuVisibility()
     {
-        return CanCopy || CanUpdate || CanView || CanDelete;
+        return CanCopy || CanUpdate || CanView || CanDelete || CustomRowActions.Any();
     }
 
     private GridItem CreateGridItem(ViewModel listModel)
