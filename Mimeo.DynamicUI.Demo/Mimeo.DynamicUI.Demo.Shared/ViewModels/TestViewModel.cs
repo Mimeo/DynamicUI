@@ -280,7 +280,7 @@ namespace Mimeo.DynamicUI.Demo.Shared.ViewModels
             }
         }
 
-        public class AdvancedSubViewModel : ViewModel, INotifyPropertyChanged
+        public class AdvancedSubViewModel : ViewModel
         {
             public string? Property1
             {
