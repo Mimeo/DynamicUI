@@ -9,6 +9,7 @@ public class DynamicField : ComponentBase
     private static readonly Dictionary<FormFieldType, Type> formFieldTypeMap = new()
     {
         { FormFieldType.Text, typeof(TextField) },
+        { FormFieldType.Combobox, typeof(TextField) },
         { FormFieldType.Checkbox, typeof(CheckboxField) },
         { FormFieldType.SingleSelect, typeof(SingleSelectField) },
         { FormFieldType.MultiSelect, typeof(MultiSelectField) },
@@ -22,7 +23,12 @@ public class DynamicField : ComponentBase
         { FormFieldType.DateTime, typeof(DateTimeField) },
         { FormFieldType.Integer, typeof(IntegerField) },
         { FormFieldType.Decimal, typeof(DecimalField) },
+#pragma warning disable CS0618 // Type or member is obsolete (Justification: Backwards compatibility)
         { FormFieldType.List, typeof(ListField<>) },
+#pragma warning restore CS0618 // Type or member is obsolete
+        { FormFieldType.Table, typeof(ListField<>) },
+        { FormFieldType.SectionList, typeof(ListField<>) },
+        { FormFieldType.ReorderableSectionList, typeof(ListField<>) },
         { FormFieldType.Nullable, typeof(NullableFormField) },
         { FormFieldType.Guid, typeof(GuidFormField) }
     };
@@ -118,7 +124,7 @@ public class DynamicField : ComponentBase
         builder.CloseComponent();
     }
 
-    private bool InheritsFormFieldBase(Type type)
+    private static bool InheritsFormFieldBase(Type type)
     {
         // The built-in methods don't support unbound generics (or I haven't found the correct one yet)
 

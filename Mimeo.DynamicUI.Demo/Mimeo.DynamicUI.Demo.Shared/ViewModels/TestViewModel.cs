@@ -144,7 +144,7 @@ namespace Mimeo.DynamicUI.Demo.Shared.ViewModels
             yield return FormField(() => Number);
             yield return FormField(() => Decimal);
             yield return FormField(() => DateTimeUtc, dateDisplayMode: DateDisplayMode.UserLocal);
-            yield return FormField(() => StringList);
+            yield return Table(() => StringList);
         }
 
         protected override IEnumerable<FormFieldDefinition> GetDropDownListFormFields()
@@ -185,13 +185,13 @@ namespace Mimeo.DynamicUI.Demo.Shared.ViewModels
             yield return FormField(() => ComboBox, textType: TextType.SingleLine, items: ["Option 1", "option2languagekey", "Option 3"]);
             yield return new FormFieldDefinition(FormFieldType.Color, () => Color);
             yield return FormField(() => Section);
-            yield return FormField(() => StringList);
+            yield return Table(() => StringList);
 
             // Depending on the structure of the view model, sometimes a table is more appropriate
-            yield return FormField(() => SimpleModelList, mode: ListFieldPresentationMode.Table);
+            yield return Table(() => SimpleModelList);
 
             // but for sufficiently large view models, a section list is easier on the user
-            yield return FormField(() => AdvancedModelList, m => m.FormField(() => m.Property1), mode: ListFieldPresentationMode.SectionList);
+            yield return SectionList(() => AdvancedModelList, m => m.FormField(() => m.Property1));
 
             yield return new SingleSelectDropDownFormFieldDefinition(() => RelatedModelId, relatedModelsSource, FormField(() => Name), idField);
             yield return new MultiSelectDropDownFormFieldDefinition(() => RelatedModelIds, relatedModelsSource, FormField(() => Name), idField);
@@ -233,9 +233,9 @@ namespace Mimeo.DynamicUI.Demo.Shared.ViewModels
             yield return FormField(() => ComboBox, textType: TextType.SingleLine, items: ["Option 1", "option2languagekey", "Option 3"]);
             yield return new FormFieldDefinition(FormFieldType.Color, () => Color);
             yield return FormField(() => Section);
-            yield return FormField(() => StringList);
-            yield return FormField(() => SimpleModelList);
-            yield return FormField(() => AdvancedModelList);
+            yield return Table(() => StringList);
+            yield return Table(() => SimpleModelList);
+            yield return SectionList(() => AdvancedModelList);
             yield return FormField(() => Enabled);
             yield return new NullableFormFieldDefinition(() => NullableStringEnabled, FormField(() => NullableStringValue));
             yield return new FormFieldDefinition(FormFieldType.Checkbox, () => EnableHiddenProperties)
@@ -249,7 +249,7 @@ namespace Mimeo.DynamicUI.Demo.Shared.ViewModels
 
         }
 
-        public class SimpleSubViewModel : ViewModel, INotifyPropertyChanged
+        public class SimpleSubViewModel : ViewModel
         {
             public string? Property1
             {
@@ -257,7 +257,7 @@ namespace Mimeo.DynamicUI.Demo.Shared.ViewModels
                 set
                 {
                     _property1 = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Property1)));
+                    RaisePropertyChanged(nameof(Property1));
                 }
             }
             private string? _property1;
@@ -268,13 +268,10 @@ namespace Mimeo.DynamicUI.Demo.Shared.ViewModels
                 set
                 {
                     _property2 = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Property2)));
+                    RaisePropertyChanged(nameof(Property2));
                 }
             }
             private int _property2;
-
-            // INotifyPropertyChanged is partially supported by the UI, and is generally not required, but can be useful in niche situations
-            public event PropertyChangedEventHandler? PropertyChanged;
 
             protected override IEnumerable<FormFieldDefinition> GetEditFormFields()
             {
@@ -283,7 +280,7 @@ namespace Mimeo.DynamicUI.Demo.Shared.ViewModels
             }
         }
 
-        public class AdvancedSubViewModel : ViewModel, INotifyPropertyChanged
+        public class AdvancedSubViewModel : ViewModel
         {
             public string? Property1
             {
@@ -291,7 +288,7 @@ namespace Mimeo.DynamicUI.Demo.Shared.ViewModels
                 set
                 {
                     _property1 = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Property1)));
+                    RaisePropertyChanged(nameof(Property1));
                 }
             }
             private string? _property1;
@@ -302,21 +299,18 @@ namespace Mimeo.DynamicUI.Demo.Shared.ViewModels
                 set
                 {
                     _property2 = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Property2)));
+                    RaisePropertyChanged(nameof(Property2));
                 }
             }
             private int _property2;
 
             public List<string> SubList { get; set; } = [];
 
-            // INotifyPropertyChanged is partially supported by the UI, and is generally not required, but can be useful in niche situations
-            public event PropertyChangedEventHandler? PropertyChanged;
-
             protected override IEnumerable<FormFieldDefinition> GetEditFormFields()
             {
                 yield return FormField(() => Property1);
                 yield return FormField(() => Property2);
-                yield return FormField(() => SubList);
+                yield return Table(() => SubList);
             }
         }
 

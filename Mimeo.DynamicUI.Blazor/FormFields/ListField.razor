@@ -5,7 +5,7 @@
 @typeparam T
 @inherits FormFieldBase<List<T>>
 
-@if (!wrapInViewModel && ListDefinition?.PresentationMode == ListFieldPresentationMode.SectionList)
+@if (!wrapInViewModel && ListDefinition?.Type == FormFieldType.SectionList)
 {
     if (ReadOnly)
     {
@@ -56,7 +56,7 @@
         <RadzenButton Icon="add_circle_outline" style="margin-top:1em;margin-bottom:1em;" Text="@lang.GetValueOrDefault("add")" Click="() => OnCreate(CreateViewModel())" />
     }
 }
-else if (!wrapInViewModel && ListDefinition?.PresentationMode == ListFieldPresentationMode.ReorderableSectionList)
+else if (!wrapInViewModel && ListDefinition?.Type == FormFieldType.ReorderableSectionList)
 {
     if (ReadOnly)
     {

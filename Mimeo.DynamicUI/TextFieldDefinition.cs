@@ -41,6 +41,22 @@ namespace Mimeo.DynamicUI
         /// <summary>
         /// An optional set of values that can be selected as a combobox. Requires <see cref="TextType"/> to be <see cref="DynamicUI.TextType.SingleLine"/>.
         /// </summary>
-        public List<string>? Items { get; set; }
+        public List<string>? Items
+        {
+            get => _items;
+            set
+            {
+                _items = value;
+
+                if (value != null && value.Count > 0)
+                {
+                    // Backwards compatibility for when Items was just an option under a Text form field type
+                    Type = FormFieldType.Combobox;
+                }
+            }
+        }
+        private List<string>? _items;
+
+        public bool MultiLine => TextType != TextType.SingleLine;
     }
 }

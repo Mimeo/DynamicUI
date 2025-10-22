@@ -132,6 +132,8 @@ namespace Mimeo.DynamicUI
 
         public string LanguageKey { get; set; }
 
+        public string DescriptionLanguageKey => LanguageKey + "_desc";
+
         public Type PropertyType { get; set; }
 
         public Type? FilterType { get; set; }
