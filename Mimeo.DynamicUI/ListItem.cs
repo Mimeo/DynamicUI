@@ -31,7 +31,7 @@ namespace Mimeo.DynamicUI
 
         public bool Equals(ListItem? other)
         {
-            return this.Equals(other);
+            return this.Equals((object?)other);
         }
 
         public override int GetHashCode()
