@@ -397,7 +397,7 @@ namespace Mimeo.DynamicUI.Blazor.Controls
             return (await ItemSource.GetModels(new DataQuery
             {
                 Filters = [
-                    new DataQueryFilter(new DataFieldDefinition(ValueField), DataFilterOperator.In, valuesSet)
+                    new DataQueryFilter(new DataFieldDefinition(ValueField), DataFilterOperator.In, valuesSet) { IgnoreCase = false }
                 ],
                 Top = valuesSet.Count
             })).Value?.ToList() ?? [];
