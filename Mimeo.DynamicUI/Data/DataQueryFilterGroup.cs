@@ -22,7 +22,8 @@ namespace Mimeo.DynamicUI.Data
         {
             return new DataQueryFilterGroup
             {
-                Filters = Filters.Select(f => f.Clone()).ToList()
+                Filters = Filters.Select(f => f.Clone()).ToList(),
+                FiltersConjunction = FiltersConjunction
             };
         }
 

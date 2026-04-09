@@ -39,7 +39,7 @@
                 Skip = this.Skip,
                 Top = this.Top,
                 SearchText = this.SearchText,
-                Filters = this.Filters.Select(f => f.Clone()).ToList(),
+                Filter = (DataQueryFilterGroup)this.Filter.Clone(),
                 Sorts = this.Sorts.Select(f => f with { } /* clone a record*/).ToList()
             };
         }

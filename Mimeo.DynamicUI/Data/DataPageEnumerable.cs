@@ -13,8 +13,9 @@
                 var skip = continuationToken as int? ?? 0;
                 var newArgs = new DataQuery
                 {
-                    Filters = args.Filters,
+                    Filter = args.Filter,
                     Sorts = args.Sorts,
+                    SearchText = args.SearchText,
                     Skip = skip,
                     Top = args.Top ?? 250
                 };
