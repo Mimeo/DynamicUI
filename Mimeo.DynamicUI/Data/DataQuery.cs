@@ -1,4 +1,4 @@
-﻿namespace Mimeo.DynamicUI.Data
+namespace Mimeo.DynamicUI.Data
 {
     public class DataQuery
     {
@@ -54,13 +54,13 @@
             return this.Skip == other.Skip
                 && this.Top == other.Top
                 && this.SearchText == other.SearchText
-                && this.Filters.SequenceEqual(other.Filters)
+                && this.Filter.Equals(other.Filter)
                 && this.Sorts.SequenceEqual(other.Sorts);
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Skip, Top, SearchText, Filters, Sorts);
+            return HashCode.Combine(Skip, Top, SearchText, Filter, Sorts);
         }
 
         public static bool operator ==(DataQuery? left, DataQuery? right)
