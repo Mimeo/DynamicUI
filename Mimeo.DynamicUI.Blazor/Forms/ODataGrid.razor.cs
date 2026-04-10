@@ -93,6 +93,9 @@ public partial class ODataGrid
     [Parameter]
     public Dictionary<string, Type> CustomFormFieldTypes { get; set; } = [];
 
+    [Parameter]
+    public EventCallback<DataQuery> OnQueryChanged { get; set; }
+
     private bool CanCreate => (Service?.SupportsCreate ?? false) && AllowCreate;
     private bool CanUpdate => (Service?.SupportsUpdate ?? false) && AllowUpdate;
     private bool CanCopy => (Service?.SupportsCopy ?? false) && AllowCopy;
@@ -248,6 +251,8 @@ public partial class ODataGrid
         });
 
         previousQuery = query.Clone();
+
+        await OnQueryChanged.InvokeAsync(previousQuery);
     }
 
     private async Task LoadSearchSuggestions(LoadDataArgs args)
