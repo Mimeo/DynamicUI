@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+﻿using AwesomeAssertions;
 using Mimeo.DynamicUI.Data;
 using Mimeo.DynamicUI.Data.OData;
 using Moq;

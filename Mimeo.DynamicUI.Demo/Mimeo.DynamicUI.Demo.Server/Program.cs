@@ -32,7 +32,7 @@ namespace Mimeo.DynamicUI.Demo
 
             app.UseHttpsRedirection();
 
-            app.UseStaticFiles();
+            app.MapStaticAssets();
             app.UseAntiforgery();
 
             app.MapControllers();

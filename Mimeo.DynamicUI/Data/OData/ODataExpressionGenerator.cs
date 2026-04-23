@@ -535,7 +535,7 @@ namespace Mimeo.DynamicUI.Data.OData
 
         protected string GetODataValue(object value)
         {
-            ArgumentNullException.ThrowIfNull(nameof(value));
+            if (value == null) throw new ArgumentNullException(nameof(value));
 
             return value switch
             {
