@@ -21,21 +21,19 @@ Mimeo Workshop Dynamic UI is a Blazor library designed to create common form UIs
 1. Install Radzen.Blazor using their [installation guide](https://blazor.radzen.com/get-started).
     - Be sure to install radzen components using builder.Services.AddRadzenComponents and adding `<RadzenComponents/>`. 
       At the time of writing, this is described in "6. Use Dialog, Notification, ContextMenu and Tooltip components".
-2. Install BlazorPro as described in their [installation guide](https://github.com/EdCharbeneau/BlazorSize/wiki).
-    - Be sure to install add `services.AddMediaQueryService();` to dependency injection and `<MediaQueryList>` around the root
-3. Install the `Mimeo.DynamicUI` nuget package into the project with your models and view models.		
-4. Install the `Mimeo.DynamicUI.Blazor` nuget package into the UI project.
-5. Add a resources file with code generation.
-6. In dependency injection, add
+2. Install the `Mimeo.DynamicUI` nuget package into the project with your models and view models.		
+3. Install the `Mimeo.DynamicUI.Blazor` nuget package into the UI project.
+4. Add a resources file with code generation.
+5. In dependency injection, add
 ```csharp
 builder.Services.AddLocalization();
 builder.Services.AddSingleton<IStringLocalizer, StringLocalizer<Language>>(); // Substitute Language for the name of your resources file.
 builder.Services.AddSingleton<IDateTimeConverter, DateTimeConverter>(); // Optionally substitute your own implementation of IDateTimeConverter. See Form Fields/DateTime below for details.
 builder.Services.AddSingleton<TaskRunningService>();
 ```
-7. Add `<script src="_content/Mimeo.DynamicUI.Blazor/DynamicUI.js"></script>` to your scripts section
-8. Add `<link rel="stylesheet" href="_content/Mimeo.DynamicUI.Blazor/app.css" />` to your styles section
-9. Add this to the scripts section, specifically before the blazor.webassembly.js script:
+6. Add `<script src="_content/Mimeo.DynamicUI.Blazor/DynamicUI.js"></script>` to your scripts section
+7. Add `<link rel="stylesheet" href="_content/Mimeo.DynamicUI.Blazor/app.css" />` to your styles section
+8. Add this to the scripts section, specifically before the blazor.webassembly.js script:
 ```
 <script src="_content/BlazorMonaco/jsInterop.js"></script>
 <script src="_content/BlazorMonaco/lib/monaco-editor/min/vs/loader.js"></script>
