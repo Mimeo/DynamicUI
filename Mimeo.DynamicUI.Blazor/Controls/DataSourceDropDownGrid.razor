@@ -7,43 +7,43 @@
 @if (Multiple)
 {
     <CustomRadzenDropDownDataGrid TValue="IEnumerable<TValue>" id="@Id" @ref="gridRefMulti"
-    AllowClear="true" 
-    Multiple="true" 
-    Chips="true"
-    SelectedValue="defaultSelectedItems"
-    Value="Values" 
-    ValueChanged="OnValuesChanged" 
-    Data="gridItems"
-    Count="gridCount"
-    Placeholder="@Placeholder"
-    LoadData="OnGridLoadData"
-    ValueProperty="@nameof(GridItem.Value)"
-    AllowFiltering="true" 
-    OnOpenPopup="OnOpenPopup"
-    Disabled="Disabled"
-    Density="Density.Compact"
-    IsLoading="isLoading"
-    MaxSelectedLabels="@int.MaxValue"
-    OnChipRemoveOverride="OnChipRemove">
+                                  Name="@Name"
+                                  AllowClear="true"
+                                  Multiple="true"
+                                  Chips="true"
+                                  SelectedValue="defaultSelectedItems"
+                                  Value="Values"
+                                  ValueChanged="OnValuesChanged"
+                                  Data="gridItems"
+                                  Count="gridCount"
+                                  Placeholder="@Placeholder"
+                                  LoadData="OnGridLoadData"
+                                  ValueProperty="@nameof(GridItem.Value)"
+                                  AllowFiltering="true"
+                                  OnOpenPopup="OnOpenPopup"
+                                  Disabled="Disabled"
+                                  Density="Density.Compact"
+                                  IsLoading="isLoading"
+                                  MaxSelectedLabels="@int.MaxValue"
+                                  OnChipRemoveOverride="OnChipRemove">
         <ValueTemplate Context="Item">
             @GetViewModelNameByValue(Item.Value)
         </ValueTemplate>
         <Columns>
             <RadzenDropDownDataGridColumn Width="60px" Sortable="false">
                 <Template Context="data">
-                    <RadzenCheckBox InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "select item" }})" TriState="false" Value="@(Values != null && Values.Contains(GetViewModelValue(data.ListModel)))"
-                    TValue="bool" Change=@(args => gridRefMulti!.SelectItem(data)) @onclick:stopPropagation />
+                    <RadzenCheckBox InputAttributes="@(new Dictionary<string, object>() { { "aria-label", "select item" } })" TriState="false" Value="@(Values != null && Values.Contains(GetViewModelValue(data.ListModel)))"
+                                    TValue="bool" Change=@(args => gridRefMulti!.SelectItem(data)) @onclick:stopPropagation />
                 </Template>
             </RadzenDropDownDataGridColumn>
             @foreach (var formField in formFields ?? [])
             {
-                <RadzenDropDownDataGridColumn
-                Property="@formField.PropertyName"
-                Type="@formField.PropertyType"
-                Title="@(lang.GetPropertyName(formField))"
-                Sortable="@formField.Sortable"
-                SortOrder="@(formField.DefaultSortDirection switch {SortDirection.Ascending => SortOrder.Ascending, SortDirection.Descending => SortOrder.Descending, _ => null})"
-                Filterable="@formField.Filterable">
+                <RadzenDropDownDataGridColumn Property="@formField.PropertyName"
+                                              Type="@formField.PropertyType"
+                                              Title="@(lang.GetPropertyName(formField))"
+                                              Sortable="@formField.Sortable"
+                                              SortOrder="@(formField.DefaultSortDirection switch {SortDirection.Ascending => SortOrder.Ascending, SortDirection.Descending => SortOrder.Descending, _ => null})"
+                                              Filterable="@formField.Filterable">
                     <Template Context="item">
                         <DynamicField FormField="@item.ListModel.GetDropDownListForm()[formField.PropertyName]" ReadOnly="true" ViewModel="item.ListModel" CustomFormFieldTypes="CustomFormFieldTypes" />
                     </Template>
@@ -55,19 +55,20 @@
 else
 {
     <CustomRadzenDropDownDataGrid TValue="TValue" id="@Id" @ref="gridRef"
-    AllowClear="true" 
-    Multiple="false"
-    SelectedItem="@gridSelectedItem" 
-    Value="Value" 
-    ValueChanged="OnValueChanged" 
-    Data="gridItems" 
-    Count="gridCount" 
-    Placeholder="@Placeholder"
-    LoadData="OnGridLoadData"
-    ValueProperty="@nameof(GridItem.Value)"
-    AllowFiltering="true"
-    OnOpenPopup="OnOpenPopup"
-    Disabled="Disabled">
+                                  Name="@Name"
+                                  AllowClear="true"
+                                  Multiple="false"
+                                  SelectedItem="@gridSelectedItem"
+                                  Value="Value"
+                                  ValueChanged="OnValueChanged"
+                                  Data="gridItems"
+                                  Count="gridCount"
+                                  Placeholder="@Placeholder"
+                                  LoadData="OnGridLoadData"
+                                  ValueProperty="@nameof(GridItem.Value)"
+                                  AllowFiltering="true"
+                                  OnOpenPopup="OnOpenPopup"
+                                  Disabled="Disabled">
         <ValueTemplate Context="Item">
             @GetViewModelNameByValue(Item.Value)
         </ValueTemplate>
@@ -75,11 +76,11 @@ else
             @foreach (var formField in formFields ?? [])
             {
                 <RadzenDropDownDataGridColumn Property="@formField.PropertyName"
-                                                Type="@formField.PropertyType"
-                                                Title="@(lang.GetPropertyName(formField))"
-                                                Sortable="@formField.Sortable"
-                                                SortOrder="@(formField.DefaultSortDirection switch {SortDirection.Ascending => SortOrder.Ascending, SortDirection.Descending => SortOrder.Descending, _ => null})"
-                                                Filterable="@formField.Filterable">
+                                              Type="@formField.PropertyType"
+                                              Title="@(lang.GetPropertyName(formField))"
+                                              Sortable="@formField.Sortable"
+                                              SortOrder="@(formField.DefaultSortDirection switch {SortDirection.Ascending => SortOrder.Ascending, SortDirection.Descending => SortOrder.Descending, _ => null})"
+                                              Filterable="@formField.Filterable">
                     <Template Context="item">
                         <DynamicField FormField="@item.ListModel.GetDropDownListForm()[formField.PropertyName]" ReadOnly="true" ViewModel="item.ListModel" CustomFormFieldTypes="CustomFormFieldTypes" />
                     </Template>
