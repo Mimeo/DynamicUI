@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+﻿using AwesomeAssertions;
 using Mimeo.DynamicUI.Extensions;
 using System.Linq.Expressions;
 

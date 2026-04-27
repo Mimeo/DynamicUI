@@ -10,7 +10,7 @@ public static class DialogServiceExtensions
 {
     public static async Task<bool?> OpenEditDialogAsync(this DialogService dialogService, string title, ViewModel viewModel, string width = "1000px", Dictionary<string, Type>? customFormFieldTypes = null)
     {
-        var result = await dialogService.OpenAsync<DynamicEditForm>(title, new Dictionary<string, object>
+        var result = await dialogService.OpenAsync<DynamicEditForm>(title, new Dictionary<string, object?>
             {
                 { nameof(DynamicEditForm.ViewModel), viewModel },
                 { nameof(DynamicEditForm.IsModal), true },
@@ -41,7 +41,7 @@ public static class DialogServiceExtensions
 
     public static async Task<bool?> OpenViewDialogAsync(this DialogService dialogService, string title, ViewModel viewModel, string width = "1000px", Dictionary<string, Type>? customFormFieldTypes = null)
     {
-        var result = await dialogService.OpenAsync<DynamicView>(title, new Dictionary<string, object>
+        var result = await dialogService.OpenAsync<DynamicView>(title, new Dictionary<string, object?>
             {
                 { nameof(DynamicView.ViewModel), viewModel },
                 { nameof(DynamicView.IsModal), true },

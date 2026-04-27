@@ -111,5 +111,5 @@ Density="@Density">
     </Columns>
 </CustomRadzenDataGrid>
 
-<MediaQuery Media="@Breakpoints.LargeUp" @bind-Matches="IsLarge" />
-<MediaQuery Media="@Breakpoints.SmallDown" @bind-Matches="IsSmall" />
+<RadzenMediaQuery Query="(min-width: 992px)" Change="@(matches => IsLarge = matches)" />
+<RadzenMediaQuery Query="(max-width: 767.98px)" Change="@(matches => IsSmall = matches)" />

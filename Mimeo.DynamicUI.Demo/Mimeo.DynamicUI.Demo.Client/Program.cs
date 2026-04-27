@@ -1,4 +1,3 @@
-using BlazorPro.BlazorSize;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Options;
@@ -25,8 +24,6 @@ namespace Mimeo.DynamicUI.Demo.Client
             // Radzen services (some require elements to be in the main layout)
             builder.Services.AddRadzenComponents(); // Requires <RadzenComponents/>, see Routes.razor
 
-            // BlazorPro services (some require elements to be in the main layout)
-            builder.Services.AddMediaQueryService(); // Requires <MediaQueryList>, see Routes.razor
 
             // Test project services
             builder.Services.AddHttpClient(Options.DefaultName, client =>

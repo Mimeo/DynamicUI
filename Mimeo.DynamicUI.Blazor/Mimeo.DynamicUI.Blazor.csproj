@@ -1,55 +1,63 @@
 <Project Sdk="Microsoft.NET.Sdk.Razor">
 
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
-    <Description>Blazor library to create UIs using view models from Mimeo.DynamicUI</Description>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<Description>Blazor library to create UIs using view models from Mimeo.DynamicUI</Description>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <None Include="..\README.md">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
-  </ItemGroup>
+	<ItemGroup>
+		<None Include="..\README.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+	</ItemGroup>
 
+	<ItemGroup>
+		<SupportedPlatform Include="browser" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <SupportedPlatform Include="browser" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="BlazorMonaco" Version="3.4.0" />
+		<PackageReference Include="CsvHelper" Version="33.1.0" />
+		<PackageReference Include="DecimalMath.DecimalEx" Version="1.0.2" />
+		<PackageReference Include="NodaTime" Version="3.3.2" />
+		<PackageReference Include="Radzen.Blazor" Version="10.3.1" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="BlazorMonaco" Version="3.3.0" />
-    <PackageReference Include="BlazorPro.BlazorSize" Version="8.0.0" />
-    <PackageReference Include="CsvHelper" Version="33.1.0" />
-    <PackageReference Include="DecimalMath.DecimalEx" Version="1.0.2" />
-    <PackageReference Include="Microsoft.AspNetCore.Components" Version="8.0.15" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="8.0.15" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.7" />
-    <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="8.0.7" />
-    <PackageReference Include="NodaTime" Version="3.2.2" />
-    <PackageReference Include="Radzen.Blazor" Version="7.0.8" />
-  </ItemGroup>
+	<ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
+		<PackageReference Include="Microsoft.AspNetCore.Components" Version="8.0.26" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="8.0.26" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.26" />
+		<PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="8.0.26" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Mimeo.DynamicUI\Mimeo.DynamicUI.csproj" />
-  </ItemGroup>
+	<ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
+		<PackageReference Include="Microsoft.AspNetCore.Components" Version="10.0.7" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="10.0.7" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.0.7" />
+		<PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="10.0.7" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Compile Update="DefaultLanguage.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>DefaultLanguage.resx</DependentUpon>
-    </Compile>
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Mimeo.DynamicUI\Mimeo.DynamicUI.csproj" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <EmbeddedResource Update="DefaultLanguage.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>DefaultLanguage.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-  </ItemGroup>
+	<ItemGroup>
+		<Compile Update="DefaultLanguage.Designer.cs">
+			<DesignTime>True</DesignTime>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>DefaultLanguage.resx</DependentUpon>
+		</Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+		<EmbeddedResource Update="DefaultLanguage.resx">
+			<Generator>ResXFileCodeGenerator</Generator>
+			<LastGenOutput>DefaultLanguage.Designer.cs</LastGenOutput>
+		</EmbeddedResource>
+	</ItemGroup>
 
 </Project>

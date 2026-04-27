@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+﻿using AwesomeAssertions;
 using Mimeo.DynamicUI.Data;
 
 namespace Mimeo.DynamicUI.Tests.OData
@@ -13,7 +13,7 @@ namespace Mimeo.DynamicUI.Tests.OData
             IAsyncEnumerable<int> enumerable = new PageEnumerable<int>(continuationToken => dataService.Query(continuationToken as ContinuationToken));
 
             // Act
-            var results = await enumerable.ToListAsync();
+            var results = await enumerable.ToListAsync(TestContext.Current.CancellationToken);
 
             // Assert
             results.Should().BeEquivalentTo(DataService.Data);

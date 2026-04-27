@@ -4,7 +4,6 @@ using Mimeo.DynamicUI.Blazor.Extensions;
 using Mimeo.DynamicUI.Data;
 using Mimeo.DynamicUI.Data.OData;
 using Radzen;
-using System.Reflection;
 
 namespace Mimeo.DynamicUI.Blazor.Controls
 {
@@ -18,6 +17,9 @@ namespace Mimeo.DynamicUI.Blazor.Controls
 
         [Parameter]
         public string? Id { get; set; }
+
+        [Parameter]
+        public string? Name { get; set; }
 
         [Parameter]
         public TValue? Value { get; set; }
@@ -290,6 +292,9 @@ namespace Mimeo.DynamicUI.Blazor.Controls
         {
             Value = value;
             await ValueChanged.InvokeAsync(value);
+
+            gridSelectedItem = null;
+            await LoadSelectedItems(gridItems.Select(g => g.ListModel));
         }
 
         private async Task OnValuesChanged(IEnumerable<TValue?>? values)
