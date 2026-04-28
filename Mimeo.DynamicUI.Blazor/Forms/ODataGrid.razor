@@ -80,7 +80,7 @@ Density="@Density">
                     </Template>
                 </CustomRadzenDataGridColumn>
             }
-            <RadzenDataGridColumn Visible="@GetActionsMenuVisibility()" TItem="GridItem" Property="Id" Title="@lang.GetValueOrDefault("actions")" TextAlign="TextAlign.Center" Sortable="false" Filterable="false">
+            <RadzenDataGridColumn Visible="@GetActionsMenuVisibility()" TItem="GridItem" Title="@lang.GetValueOrDefault("actions")" TextAlign="TextAlign.Center" Sortable="false" Filterable="false">
                 <Template Context="item">
                     <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25em">
                         @foreach (var action in CustomRowActions)

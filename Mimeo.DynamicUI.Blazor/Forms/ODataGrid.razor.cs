@@ -405,8 +405,7 @@ public partial class ODataGrid
     {
         if (gridRef != null)
         {
-            gridRef.Reset();
-            await gridRef.Reload();
+            await gridRef.FirstPage(true);
         }
     }
 
@@ -414,8 +413,7 @@ public partial class ODataGrid
     {
         if (gridRef != null)
         {
-            gridRef.Reset();
-            await gridRef.Reload();
+            await gridRef.FirstPage(true);
         }
     }
 
