@@ -102,6 +102,7 @@ public partial class ODataGrid
     private bool CanDelete => (Service?.SupportsDelete ?? false) && AllowDelete;
     private bool CanView => (Service?.SupportsView ?? false) && AllowView;
     private bool SupportsSearchText => Service?.SupportsSearchText ?? false;
+    private bool SupportsSearchAutoComplete => Service?.SupportsSearchAutoComplete ?? false;
 
     private RadzenDataGrid<GridItem>? gridRef;
     private bool IsSmall;
@@ -213,18 +214,28 @@ public partial class ODataGrid
         }
 
         // Work around Radzen bug where it's not thread safe
-        args.Filters = args.Filters.ToList();
-        args.Sorts = args.Sorts.ToList();
+        args.Filters = args.Filters?.ToList() ?? [];
+        args.Sorts = args.Sorts?.ToList() ?? [];
 
         // The GridItem class is private to this control
         // Filters and sorts will be on a GridItem property,
         // but we need to feed the actual property to ListMethod()
         foreach (var filter in args.Filters)
         {
+            if (string.IsNullOrEmpty(filter.Property))
+            {
+                continue;
+            }
+
             filter.Property = filter.Property.Replace($"{nameof(GridItem.ListModel)}.", "").Replace($"{nameof(GridItem.ListModel)}/", "");
         }
         foreach (var orderBy in args.Sorts)
         {
+            if (string.IsNullOrEmpty(orderBy.Property))
+            {
+                continue;
+            }
+
             orderBy.Property = orderBy.Property.Replace($"{nameof(GridItem.ListModel)}.", "").Replace($"{nameof(GridItem.ListModel)}/", "");
         }
         searchModel ??= await taskRunningService.Run(() => Service.GetSearchModel());

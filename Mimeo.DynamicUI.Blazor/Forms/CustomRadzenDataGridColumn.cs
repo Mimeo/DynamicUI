@@ -3,7 +3,7 @@ using Radzen;
 
 namespace Mimeo.DynamicUI.Blazor.Forms;
 
-public class CustomRadzenDataGridColumn<TItem> : RadzenDataGridColumn<TItem>
+public class CustomRadzenDataGridColumn<TItem> : RadzenDataGridColumn<TItem> where TItem : notnull
 {
     private static readonly IReadOnlyDictionary<FilterOperator, string> DataFilterOperators = new Dictionary<FilterOperator, string>
     {
@@ -23,7 +23,7 @@ public class CustomRadzenDataGridColumn<TItem> : RadzenDataGridColumn<TItem>
         {FilterOperator.IsNotEmpty, "ne"}
     };
 
-    protected override string GetColumnODataFilter(object filterValue, FilterOperator filterOperator)
+    protected override string GetColumnODataFilter(object? filterValue, FilterOperator filterOperator)
     {
         var odataOperator = DataFilterOperators[filterOperator];
         var property = GetFilterProperty().Replace('.', '/');

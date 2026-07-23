@@ -3,14 +3,14 @@ using Microsoft.AspNetCore.Components.Web;
 using Mimeo.DynamicUI.Blazor.Extensions;
 using Mimeo.DynamicUI.Data;
 using Mimeo.DynamicUI.Data.OData;
-using Radzen.Blazor.Rendering;
+using Radzen.Blazor;
 
 namespace Mimeo.DynamicUI.Blazor.Forms.DataFilter
 {
     public partial class DataFilterField
     {
         private ElementReference _customSplitButton;
-        private Popup? _popup;
+        private RadzenPopup? _popup;
         private IEnumerable<FilterOperatorItem>? _filterOperators;
 
         [Parameter]

@@ -4,6 +4,8 @@ public interface IReadOnlyDataService
 {
     bool SupportsView { get; }
     bool SupportsSearchText { get; }
+    public bool SupportsSearchAutoComplete => SupportsSearchText;
+
     Task<DataResponse<ViewModel>> GetModels(DataQuery args);
     Task<ViewModel> GetNewListModel();
 
