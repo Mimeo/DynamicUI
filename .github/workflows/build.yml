@@ -85,7 +85,9 @@ jobs:
       id-token: write  # enable GitHub OIDC token issuance for this job
 
     # Only run for main branch
-    if: github.ref == 'refs/heads/main'
+    #if: github.ref == 'refs/heads/main'
+    #Temporarily changed to all branches for testing
+    if: github.event_name != 'pull_request' && github.event_name != 'create'
 
     steps:
 
