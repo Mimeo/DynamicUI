@@ -81,6 +81,8 @@ jobs:
   publish-nuget:
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write  # enable GitHub OIDC token issuance for this job
 
     # Only run for main branch
     if: github.ref == 'refs/heads/main'
@@ -98,7 +100,11 @@ jobs:
         name: nuget
         path: nuget
 
+    - name: NuGet login (OIDC → temp API key)
+      uses: NuGet/login@v1
+      id: login
+      with:
+        user: ${{ secrets.NUGET_USER }}
+
     - name: Upload Packages
-      env:
-        NUGET_API_KEY: ${{ secrets.NUGET_MIMEO_PUBLISH_KEY }}
-      run: dotnet nuget push ./nuget/*.nupkg --source https://api.nuget.org/v3/index.json --skip-duplicate --api-key $NUGET_API_KEY
+      run: dotnet nuget push ./nuget/*.nupkg --source https://api.nuget.org/v3/index.json --skip-duplicate --api-key ${{steps.login.outputs.NUGET_API_KEY}}
