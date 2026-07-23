@@ -32,6 +32,8 @@ namespace Mimeo.DynamicUI.Demo.Client.Services
 
         public bool SupportsSearchText => true;
 
+        public bool SupportsSearchAutoComplete => true;
+
         public async Task<DataResponse<TestViewModel>> GetModels(DataQuery args)
         {
             var apiUrl = $"{this.apiUrl}/Test";

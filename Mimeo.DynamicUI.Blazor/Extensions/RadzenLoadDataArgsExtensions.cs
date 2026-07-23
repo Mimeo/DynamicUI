@@ -14,6 +14,11 @@ namespace Mimeo.DynamicUI.Blazor.Extensions
             };
             foreach (var filter in args.Filters ?? [])
             {
+                if (string.IsNullOrEmpty(filter.Property))
+                {
+                    continue;
+                }
+
                 var formFieldDefinition = viewModel.GetListForm().Values.SingleOrDefault(f => f.PropertyName == filter.Property);
                 if (formFieldDefinition == null)
                 {
@@ -32,6 +37,11 @@ namespace Mimeo.DynamicUI.Blazor.Extensions
             }
             foreach (var sort in args.Sorts ?? [])
             {
+                if (string.IsNullOrEmpty(sort.Property))
+                {
+                    continue;
+                }
+
                 var formFieldDefinition = viewModel.GetListForm().Values.SingleOrDefault(f => f.PropertyName == sort.Property);
                 if (formFieldDefinition == null)
                 {
@@ -69,6 +79,11 @@ namespace Mimeo.DynamicUI.Blazor.Extensions
             };
             foreach (var filter in args.Filters ?? [])
             {
+                if (string.IsNullOrEmpty(filter.Property))
+                {
+                    continue;
+                }
+
                 if (filter.FilterValue != null)
                 {
                     query.Filters.Add(new DataQueryFilter(new DataFieldDefinition(getFormField(filter.Property, filter.FilterValue)), ToDataFilterOperator(filter.FilterOperator), filter.FilterValue));
@@ -81,6 +96,11 @@ namespace Mimeo.DynamicUI.Blazor.Extensions
 
             foreach (var sort in args.Sorts ?? [])
             {
+                if (string.IsNullOrEmpty(sort.Property))
+                {
+                    continue;
+                }
+
                 query.Sorts.Add(new DataQuerySort(new DataFieldDefinition(getFormField(sort.Property, null)), sort.SortOrder == SortOrder.Descending));
             }
             return query;

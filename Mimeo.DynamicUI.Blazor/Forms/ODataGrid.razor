@@ -29,7 +29,14 @@
 
             @if (SupportsSearchText)
             {
-                <RadzenAutoComplete @bind-Value="@filterViewModel.SearchText" Data="@searchSuggestions" Placeholder="@lang.GetValueOrDefault("datafilter_searchtextplaceholder")" LoadData="@LoadSearchSuggestions" Change="@OnSearchChanged" Style="flex:1" InputType="search" />
+                @if (SupportsSearchAutoComplete)
+                {
+                    <RadzenAutoComplete @bind-Value="@filterViewModel.SearchText" Data="@searchSuggestions" Placeholder="@lang.GetValueOrDefault("datafilter_searchtextplaceholder")" LoadData="@LoadSearchSuggestions" Change="@OnSearchChanged" Style="flex:1" InputType="search" />
+                }
+                else
+                {
+                    <RadzenTextBox @bind-Value="@filterViewModel.SearchText" Change="OnSearchChanged" Placeholder="@lang.GetValueOrDefault("datafilter_searchtextplaceholder")" Style="flex:1" />
+                }
             }
 
             <RadzenDropDown @ref="addFilterDropdown"
