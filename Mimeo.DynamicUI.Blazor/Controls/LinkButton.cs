@@ -55,24 +55,25 @@ namespace Mimeo.DynamicUI.Blazor.Controls
                 if (!string.IsNullOrEmpty(Icon))
                 {
                     builder.OpenElement(12, "i");
-                    builder.AddAttribute(13, "class", "rz-button-icon-left rzi");
-                    builder.AddAttribute(14, "style", !string.IsNullOrEmpty(IconColor) ? $"color:{IconColor}" : null);
-                    builder.AddContent(15, (MarkupString)Icon);
+                    builder.AddAttribute(13, "class", "notranslate rz-button-icon-left rzi");
+                    builder.AddAttribute(14, "aria-hidden", "true");
+                    builder.AddAttribute(15, "style", !string.IsNullOrEmpty(IconColor) ? $"color:{IconColor}" : null);
+                    builder.AddContent(16, Icon);
                     builder.CloseElement();
                 }
                 if (!string.IsNullOrEmpty(Image))
                 {
-                    builder.OpenElement(16, "img");
-                    builder.AddAttribute(17, "class", "rz-button-icon-left rzi");
-                    builder.AddAttribute(18, "src", Image);
-                    builder.AddAttribute(19, "alt", ImageAlternateText);
+                    builder.OpenElement(17, "img");
+                    builder.AddAttribute(18, "class", "notranslate rz-button-icon-left rzi");
+                    builder.AddAttribute(19, "src", Image);
+                    builder.AddAttribute(20, "alt", ImageAlternateText);
                     builder.CloseElement();
                 }
                 if (!string.IsNullOrEmpty(Text))
                 {
-                    builder.OpenElement(20, "span");
-                    builder.AddAttribute(21, "class", "rz-button-text");
-                    builder.AddContent(22, Text);
+                    builder.OpenElement(21, "span");
+                    builder.AddAttribute(22, "class", "rz-button-text");
+                    builder.AddContent(23, Text);
                     builder.CloseElement();
                 }
             }
