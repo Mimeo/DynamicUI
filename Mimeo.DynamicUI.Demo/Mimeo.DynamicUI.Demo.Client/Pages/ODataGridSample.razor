@@ -23,7 +23,7 @@ CustomRowActions="CustomRowActions" />
         ["testviewmodel_customformfield"] = typeof(CustomFormField)
     };
 
-    protected List<CustomMenuItem> CustomRowActions = [];
+    protected List<CustomMenuItemBase> CustomRowActions = [];
 
     protected override void OnInitialized()
     {
@@ -32,9 +32,9 @@ CustomRowActions="CustomRowActions" />
         DemoOptions.OnValueChanged = EventCallback.Factory.Create(this, () => StateHasChanged());
 
         CustomRowActions = [
-            new()
+            new CustomMenuButton()
             {
-                Name = "Log Item to Browser Console", 
+                Name = "Log Item to Browser Console",
                 Icon = "cruelty_free", // 🐰
                 Callback = new EventCallback<ViewModel>(this, new Action<ViewModel>(vm => Console.WriteLine($"Custom action for view model '{(vm as TestViewModel)?.Name}' has been clicked.")))
             }
