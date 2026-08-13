@@ -2,7 +2,7 @@
 {
     public class CustomMenuLink : CustomMenuItemBase
     {
-        public required string Path { get; set; }
-        public string? Target { get; set; }
+        public required Func<ViewModel, string> Path { get; set; }
+        public Func<ViewModel, string>? Target { get; set; }
     }
 }

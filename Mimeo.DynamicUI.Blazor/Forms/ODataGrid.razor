@@ -98,7 +98,7 @@ Density="@Density">
                             }
                             else if (action is CustomMenuLink actionLink)
                             {
-                                <LinkButton Path="@actionLink.Path" Target="@actionLink.Path" MouseEnter="@(args => @item.OnCustomActionMouseEnter(args, action))" Icon="@action.Icon" Size="@MenuButtonSize" ButtonStyle="ButtonStyle.Base" />
+                                <LinkButton Path="@actionLink.Path.Invoke(item.ListModel)" Target="@actionLink.Target?.Invoke(item.ListModel)" MouseEnter="@(args => @item.OnCustomActionMouseEnter(args, action))" Icon="@action.Icon" Size="@MenuButtonSize" ButtonStyle="ButtonStyle.Base" />
                             }
                         }
 
