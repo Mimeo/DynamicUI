@@ -92,7 +92,14 @@ Density="@Density">
                     <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25em">
                         @foreach (var action in CustomRowActions)
                         {
-                            <RadzenButton Click="@(args => @item.OnCustomAction(args, action))" MouseEnter="@(args => @item.OnCustomActionMouseEnter(args, action))" Icon="@action.Icon" Size="@MenuButtonSize" ButtonStyle="ButtonStyle.Base"></RadzenButton>
+                            if (action is CustomMenuButton actionButton)
+                            {
+                                <RadzenButton Click="@(args => @item.OnButtonCustomAction(args, actionButton))" MouseEnter="@(args => @item.OnCustomActionMouseEnter(args, action))" Icon="@action.Icon" Size="@MenuButtonSize" ButtonStyle="ButtonStyle.Base"></RadzenButton>
+                            }
+                            else if (action is CustomMenuLink actionLink)
+                            {
+                                <LinkButton Path="@actionLink.Path.Invoke(item.ListModel)" Target="@actionLink.Target?.Invoke(item.ListModel)" MouseEnter="@(args => @item.OnCustomActionMouseEnter(args, action))" Icon="@action.Icon" Size="@MenuButtonSize" ButtonStyle="ButtonStyle.Base" />
+                            }
                         }
 
                         @if (CanCopy)

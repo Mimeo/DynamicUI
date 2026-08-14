@@ -84,7 +84,7 @@ public partial class ODataGrid
     public bool AllowView { get; set; } = true;
 
     [Parameter]
-    public List<CustomMenuItem> CustomRowActions { get; set; } = [];
+    public List<CustomMenuItemBase> CustomRowActions { get; set; } = [];
 
     /// <summary>
     /// For form fields of type <see cref="FormFieldType.Custom"/>, a dictionary matching form field property language keys to controls that can display them.
@@ -471,11 +471,11 @@ public partial class ODataGrid
         public Func<ViewModel, Task> ViewRow { get; set; } = default!;
         public Action<ElementReference, string> ShowTooltip { get; set; } = default!;
 
-        public async Task OnCustomAction(MouseEventArgs _, CustomMenuItem customMenuItem)
+        public async Task OnButtonCustomAction(MouseEventArgs _, CustomMenuButton customMenuItem)
         {
             await customMenuItem.Callback.InvokeAsync(ListModel);
         }
-        public void OnCustomActionMouseEnter(ElementReference element, CustomMenuItem customMenuItem) => ShowTooltip(element, customMenuItem.Name);
+        public void OnCustomActionMouseEnter(ElementReference element, CustomMenuItemBase customMenuItem) => ShowTooltip(element, customMenuItem.Name);
 
         public async Task OnEditClick(MouseEventArgs _) => await EditRow(ListModel);
         public void OnEditMouseEnter(ElementReference element) => ShowTooltip(element, "edit");
