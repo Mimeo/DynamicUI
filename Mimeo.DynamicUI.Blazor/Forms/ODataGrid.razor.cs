@@ -130,6 +130,8 @@ public partial class ODataGrid
             throw new InvalidOperationException("gridRef has not yet been bound");
         }
 
+        // Clear the cached query so LoadData doesn't skip the request when the query is unchanged
+        previousQuery = null;
         await gridRef.Reload();
     }
 
@@ -323,8 +325,7 @@ public partial class ODataGrid
 
             if (gridRef != null)
             {
-                previousQuery = null;
-                await gridRef.Reload();
+                await Reload();
             }
         }
     }
@@ -370,7 +371,7 @@ public partial class ODataGrid
 
             if (gridRef != null)
             {
-                await gridRef.Reload();
+                await Reload();
             }
         }
     }
@@ -395,7 +396,7 @@ public partial class ODataGrid
 
         if (gridRef != null)
         {
-            await gridRef.Reload();
+            await Reload();
         }
     }
 
@@ -432,7 +433,7 @@ public partial class ODataGrid
     {
         if (gridRef != null)
         {
-            await gridRef.Reload();
+            await Reload();
         }
     }
 
