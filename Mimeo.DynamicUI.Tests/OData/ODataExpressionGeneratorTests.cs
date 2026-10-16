@@ -26,6 +26,70 @@ namespace Mimeo.DynamicUI.Tests.OData
             expression.Should().Be("tolower(TestProperty) eq 'value'");
         }
 
+        [Theory]
+        [InlineData(true, "'", "tolower(TestProperty) eq ''''")]
+        [InlineData(true, "O'Brien", "tolower(TestProperty) eq 'o''brien'")]
+        [InlineData(false, "O'Brien", "TestProperty eq 'O''Brien'")]
+        [InlineData(false, "''", "TestProperty eq ''''''")]
+        public void CanFilterString_EscapesSingleQuotes(bool ignoreCase, string value, string expectedQuery)
+        {
+            // Arrange
+            var expressionGenerator = new ODataExpressionGenerator(Mock.Of<IDateTimeConverter>());
+            var definition = new DataFieldDefinition("TestClass", typeof(string), "TestProperty");
+            var filter = new DataQueryFilter(definition, DataFilterOperator.Equals, value)
+            {
+                IgnoreCase = ignoreCase
+            };
+            var query = new DataQuery
+            {
+                Filters = [filter]
+            };
+
+            // Act
+            var expression = expressionGenerator.GenerateODataFilter(query);
+
+            // Assert
+            expression.Should().Be(expectedQuery);
+        }
+
+        [Fact]
+        public void CanFilterStringIn_EscapesSingleQuotes()
+        {
+            // Arrange
+            var expressionGenerator = new ODataExpressionGenerator(Mock.Of<IDateTimeConverter>());
+            var definition = new DataFieldDefinition("TestClass", typeof(string), "TestProperty");
+            var filter = new DataQueryFilter(definition, DataFilterOperator.In, new List<string> { "O'Brien", "Smith" });
+            var query = new DataQuery
+            {
+                Filters = [filter]
+            };
+
+            // Act
+            var expression = expressionGenerator.GenerateODataFilter(query);
+
+            // Assert
+            expression.Should().Be("tolower(TestProperty) in ('o''brien','smith')");
+        }
+
+        [Fact]
+        public void CanFilterListOfString_EscapesSingleQuotes()
+        {
+            // Arrange
+            var expressionGenerator = new ODataExpressionGenerator(Mock.Of<IDateTimeConverter>());
+            var definition = new DataFieldDefinition("TestClass", typeof(List<string>), "TestProperty");
+            var filter = new DataQueryFilter(definition, DataFilterOperator.Contains, "'");
+            var query = new DataQuery
+            {
+                Filters = [filter]
+            };
+
+            // Act
+            var expression = expressionGenerator.GenerateODataFilter(query);
+
+            // Assert
+            expression.Should().Be("TestProperty/any(i: contains(tolower(i), ''''))");
+        }
+
         [Fact]
         public void CanFilterListOfString()
         {
