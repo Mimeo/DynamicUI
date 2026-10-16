@@ -297,11 +297,11 @@ namespace Mimeo.DynamicUI.Data.OData
             {
                 if (ignoreCase)
                 {
-                    propertyValueString = $"'{propertyValueString.ToLower()}'";
+                    propertyValueString = $"'{EscapeODataString(propertyValueString.ToLower())}'";
                 }
                 else
                 {
-                    propertyValueString = $"'{propertyValueString}'";
+                    propertyValueString = $"'{EscapeODataString(propertyValueString)}'";
                 }
 
                 if (!string.IsNullOrEmpty(propertyValueString) && @operator == DataFilterOperator.Contains)
@@ -347,8 +347,8 @@ namespace Mimeo.DynamicUI.Data.OData
             else if (propertyValue is IEnumerable<string> propertyValueEnumerable)
             {
                 string propertyValueExpression = ignoreCase
-                    ? $"({string.Join(",", propertyValueEnumerable.Select(v => $"'{v.ToLower()}'"))})"
-                    : $"({string.Join(",", propertyValueEnumerable.Select(v => $"'{v}'"))})";
+                    ? $"({string.Join(",", propertyValueEnumerable.Select(v => $"'{EscapeODataString(v.ToLower())}'"))})"
+                    : $"({string.Join(",", propertyValueEnumerable.Select(v => $"'{EscapeODataString(v)}'"))})";
 
                 if (@operator == DataFilterOperator.In)
                 {
@@ -377,11 +377,11 @@ namespace Mimeo.DynamicUI.Data.OData
             var enumerableValue = ((IEnumerable)(propertyValue != null ? propertyValue : Enumerable.Empty<object>())).AsQueryable();
 
             var enumerableValueAsString = "(" + string.Join(",",
-                (enumerableValue.ElementType == typeof(string) ? enumerableValue.Cast<string>().Select(i => $@"'{i}'").Cast<object>() : enumerableValue.Cast<object>())) + ")";
+                (enumerableValue.ElementType == typeof(string) ? enumerableValue.Cast<string>().Select(i => $@"'{EscapeODataString(i)}'").Cast<object>() : enumerableValue.Cast<object>())) + ")";
 
             var enumerableValueAsStringOrForAny = string.Join(" or ",
                 (enumerableValue.ElementType == typeof(string)
-                    ? enumerableValue.Cast<string>().Select(i => $@"i eq '{i}'").Cast<object>()
+                    ? enumerableValue.Cast<string>().Select(i => $@"i eq '{EscapeODataString(i)}'").Cast<object>()
                     : enumerableValue.Cast<object>().Select(i => $@"i eq {i}").Cast<object>()));
 
             if (enumerableValue.Any() && @operator == DataFilterOperator.Contains)
@@ -408,7 +408,7 @@ namespace Mimeo.DynamicUI.Data.OData
             {
                 return "(" + string.Join(" and ",
                                (enumerableValue.ElementType == typeof(string)
-                                   ? enumerableValue.Cast<string>().Select(i => $@"{property}/any(i: i eq '{i}')").Cast<object>()
+                                   ? enumerableValue.Cast<string>().Select(i => $@"{property}/any(i: i eq '{EscapeODataString(i)}')").Cast<object>()
                                    : enumerableValue.Cast<object>().Select(i => $@"{property}/any(i: i eq {i})").Cast<object>()))
                            + ")";
             }
@@ -417,7 +417,7 @@ namespace Mimeo.DynamicUI.Data.OData
             {
                 return "not (" + string.Join(" and ",
                                    (enumerableValue.ElementType == typeof(string)
-                                       ? enumerableValue.Cast<string>().Select(i => $@"{property}/any(i: i eq '{i}')").Cast<object>()
+                                       ? enumerableValue.Cast<string>().Select(i => $@"{property}/any(i: i eq '{EscapeODataString(i)}')").Cast<object>()
                                        : enumerableValue.Cast<object>().Select(i => $@"{property}/any(i: i eq {i})").Cast<object>()))
                                + ")";
             }
@@ -539,7 +539,7 @@ namespace Mimeo.DynamicUI.Data.OData
 
             return value switch
             {
-                string => $"'{value}'",
+                string stringValue => $"'{EscapeODataString(stringValue)}'",
                 DateTimeOffset dateTimeOffset => dateTimeOffset.UtcDateTime.ToString("o"),
                 DateTime dateTime => dateTime.ToString("o"),
                 _ => value.ToString()!
@@ -600,6 +600,14 @@ namespace Mimeo.DynamicUI.Data.OData
                 default:
                     return false;
             }
+        }
+
+        /// <summary>
+        /// Escapes a value for use inside a single-quoted OData string literal
+        /// </summary>
+        protected static string EscapeODataString(string value)
+        {
+            return value.Replace("'", "''");
         }
 
         protected static string? GetValueAsString(object? value)
