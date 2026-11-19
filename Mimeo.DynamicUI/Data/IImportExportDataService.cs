@@ -12,8 +12,12 @@ namespace Mimeo.DynamicUI.Data
     {
         IEnumerable<ImportExportDataType> SupportedDataTypes { get; }
 
+        [Obsolete("Use a CsvHelper.CsvRecordMapAttribute applied to the model class instead.", error: true)]
         public Type? CsvImportClassMapType => null;
+
+        [Obsolete("Use a CsvHelper.CsvRecordMapAttribute applied to the model class instead.", error: true)]
         public Type? CsvExportClassMapType => null;
+
         public JsonSerializerOptions? JsonSerializerOptions => null;
 
         Type GetImportModelType(ImportExportDataType dataType);
@@ -53,14 +57,12 @@ namespace Mimeo.DynamicUI.Data
                 case ImportExportDataType.CSV:
                     {
                         await using var writer = new StringWriter();
-                        await using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
-
-                        if (CsvExportClassMapType != null)
-                        {
-                            csv.Context.RegisterClassMap(CsvExportClassMapType);
-                        }
-
+                        await using var csv = CsvWriter.Create(writer);
+                        
                         await csv.WriteRecordsAsync(resultsEnumerable);
+
+                        // WriteRecordsAsync only writes out full buffers; flush the rest before reading the StringWriter
+                        await csv.FlushAsync();
 
                         var file = Encoding.UTF8.GetBytes(writer.ToString());
                         return file;

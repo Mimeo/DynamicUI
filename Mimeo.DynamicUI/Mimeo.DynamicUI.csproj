@@ -16,8 +16,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CsvHelper" Version="33.1.0" />
-    <PackageReference Include="Microsoft.Extensions.Localization.Abstractions" Version="10.0.11" />
+    <PackageReference Include="CsvHelper" Version="34.1.0" PrivateAssets="none" />
+    <PackageReference Include="Microsoft.Extensions.Localization.Abstractions" Version="10.0.15" />
     <PackageReference Include="System.Linq.Async" Version="7.0.1" />
   </ItemGroup>
 

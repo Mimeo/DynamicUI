@@ -1,9 +1,8 @@
-﻿@using CsvHelper
-@using CsvHelper.Configuration
-@using System.Collections
+﻿@using System.Collections
 @using System.Diagnostics
-@using System.Globalization
+@using System.Reflection
 @using System.Text
+@using CsvHelper
 @using Mimeo.DynamicUI.Blazor.Extensions
 
 @implements IDisposable
@@ -93,12 +92,12 @@
     {
         ErrorMessage = string.Empty;
 
-        var configuration = new CsvConfiguration(CultureInfo.InvariantCulture)
-            {
-                Encoding = Encoding.UTF8,
-                Delimiter = ",",
-                HasHeaderRecord = true
-            };
+        var configuration = new CsvReaderOptions
+        {
+            Encoding = Encoding.UTF8,
+            Separator = ',',
+            HasHeader = true
+        };
 
         try
         {
@@ -109,7 +108,7 @@
             void refreshProgress()
             {
                 importTimeElapsed = stopwatch.Elapsed;
-                StateHasChanged();
+                _ = InvokeAsync(StateHasChanged);
 
                 if (importedCount == 0)
                 {
@@ -129,7 +128,7 @@
 
                 var timePerImport = importTimeElapsedDuringLastImportReport / importedCount;
                 estimatedTimeRemaining = timePerImport * (estimatedTotalCount - importedCount);
-                StateHasChanged();
+                _ = InvokeAsync(StateHasChanged);
             }
 
             void onImportedCountChanged(int importedCount)
@@ -140,16 +139,13 @@
             }
 
             using var textReader = new StreamReader(stream, Encoding.UTF8);
-            using var csv = new CsvReader(textReader, configuration);
+            using var csv = CsvReader.Create(textReader, configuration);
 
-            if (ImportExportDataService.CsvImportClassMapType is not null)
-            {
-                csv.Context.RegisterClassMap(ImportExportDataService.CsvImportClassMapType);
-            }
+            // ReadCsvRecords<T>(csv), where T is our import model type
+            var modelType = ImportExportDataService.GetImportModelType(ImportExportDataType.CSV);
+            var records = (IAsyncEnumerable<object?>)readCsvRecordsMethod.MakeGenericMethod(modelType).Invoke(null, [csv])!;
 
-            var data = csv.GetRecordsAsync(ImportExportDataService.GetImportModelType(ImportExportDataType.CSV));
-
-            var args = new ImportEventArgs<object?>(data);
+            var args = new ImportEventArgs<object?>(records);
             args.OnImportedCountChanged += onImportedCountChanged;
 
             var backgroundRefreshTimer = new Timer(_ => refreshProgress(), null, 0, 1000);
@@ -173,6 +169,19 @@
         }
     }
 
+    private static readonly MethodInfo readCsvRecordsMethod =
+        typeof(ImportForm).GetMethod(nameof(ReadCsvRecords), BindingFlags.NonPublic | BindingFlags.Static)!;
+
+    // Calls GetRecordsAsync<T> directly rather than finding it by reflection, so the trimmer keeps it,
+    // and boxes each record so struct models work (IAsyncEnumerable<T> is only covariant for reference types)
+    private static async IAsyncEnumerable<object?> ReadCsvRecords<T>(CsvReader csv)
+    {
+        await foreach (var record in csv.GetRecordsAsync<T>())
+        {
+            yield return record;
+        }
+    }
+
     private async Task ImportJson(InputFileChangeEventArgs e)
     {
         ErrorMessage = string.Empty;
@@ -186,7 +195,7 @@
             void refreshProgress()
             {
                 importTimeElapsed = stopwatch.Elapsed;
-                StateHasChanged();
+                _ = InvokeAsync(StateHasChanged);
 
                 if (importedCount == 0)
                 {
@@ -206,7 +215,7 @@
 
                 var timePerImport = importTimeElapsedDuringLastImportReport / importedCount;
                 estimatedTimeRemaining = timePerImport * (estimatedTotalCount - importedCount);
-                StateHasChanged();
+                _ = InvokeAsync(StateHasChanged);
             }
 
             void onImportedCountChanged(int importedCount)
@@ -252,7 +261,7 @@
     private void OnTaskRunningChanged(bool isRunning)
     {
         taskRunning = isRunning;
-        StateHasChanged();
+        _ = InvokeAsync(StateHasChanged);
     }
 
     public void Dispose()
