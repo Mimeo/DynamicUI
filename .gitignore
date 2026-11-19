@@ -360,4 +360,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
-*.json
+
+# GitVersion output (generated in CI)
+version_info.json
