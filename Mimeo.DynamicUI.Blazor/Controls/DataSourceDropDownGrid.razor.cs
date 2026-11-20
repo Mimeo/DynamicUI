@@ -139,7 +139,6 @@ namespace Mimeo.DynamicUI.Blazor.Controls
             }
 
             isLoading = true;
-            StateHasChanged();
 
             try
             {
@@ -210,7 +209,6 @@ namespace Mimeo.DynamicUI.Blazor.Controls
             finally
             {
                 isLoading = false;
-                StateHasChanged();
             }
         }
 

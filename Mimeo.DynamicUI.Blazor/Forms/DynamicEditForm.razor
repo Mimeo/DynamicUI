@@ -122,7 +122,11 @@
 
     private async Task SubmitEventHandler()
     {
+#if NET11_0_OR_GREATER
+        if (Context != null && await Context.ValidateAsync() == true)
+#else
         if (Context?.Validate() == true)
+#endif
         {
             ErrorMessage = "";
             try

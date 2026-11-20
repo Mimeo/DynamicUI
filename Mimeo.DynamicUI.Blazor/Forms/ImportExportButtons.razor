@@ -1,8 +1,10 @@
-﻿@using Mimeo.DynamicUI.Blazor.Extensions
+﻿@using Microsoft.Extensions.Logging
+@using Mimeo.DynamicUI.Blazor.Extensions
 
 @inject DialogService dialogService
 @inject TaskRunningService taskRunningService
 @inject IJSRuntime JSRuntime
+@inject ILogger<ImportExportButtons> logger
 
 @{
     RenderFragment exportFragment;
@@ -66,7 +68,24 @@
             var extension = dataType.ToString("f").ToLower(); // This works for CSV and JSON. In the future we might need to tweak things.
 
             var fileName = $"export-{DateTime.Now.ToString("o").Replace(":", "_")}.{extension}";
-            await JSRuntime.InvokeVoidAsync("exportHelpers.downloadFile", fileName, $"text/{extension}", file);
+
+            try
+            {
+                await JSRuntime.InvokeVoidAsync("exportHelpers.downloadFile", fileName, $"text/{extension}", file);
+            }
+            catch (JSDisconnectedException)
+            {
+                // User navigated away or closed the tab; safe to ignore.
+            }
+            catch (TaskCanceledException)
+            {
+                // Interop timed out or was canceled during component disposal.
+            }
+            catch (JSException ex)
+            {
+                // Actual bug or runtime error in the JS function; log it without crashing the circuit.
+                logger.LogWarning(ex, "Failed to execute exportHelpers.downloadFile JS interop.");
+            }
         });
     }
 

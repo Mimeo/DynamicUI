@@ -1,6 +1,9 @@
-﻿namespace Mimeo.DynamicUI.Demo.Shared.Models
+﻿using CsvHelper;
+
+namespace Mimeo.DynamicUI.Demo.Shared.Models
 {
-    public class TestModel
+    [CsvRecord]
+    public partial class TestModel
     {
         public Guid Id { get; set; }
         public string? Name { get; set; }
@@ -13,22 +16,31 @@
         public DateTimeOffset DateTimeOffset { get; set; }
         public TimeSpan Time { get; set; }
         public string? SingleSelect { get; set; }
+        [CsvConverter(typeof(JsonCsvConverter<List<string>>))]
         public List<string> MultiSelect { get; set; } = new();
         public string? ComboBox { get; set; }
         public string? Color { get; set; }
+        [CsvColumn(Prefix = "Section.")]
         public SubModelSimple Section { get; set; } = new();
+        [CsvConverter(typeof(JsonCsvConverter<List<string>>))]
         public List<string> StringList { get; set; } = new();
+
+        // Lists of objects have no flat CSV representation; they round-trip through JSON import/export only
+        [CsvIgnore]
         public List<SubModelSimple> SimpleModelList { get; set; } = new();
+        [CsvIgnore]
         public List<SubModelAdvanced> AdvancedModelList { get; set; } = new();
         public string? NullableString { get; set; }
         public bool Enabled { get; set; }
         public bool EnableHiddenProperties { get; set; }
         public string? HiddenString { get; set; }
         public Guid? RelatedModelId { get; set; }
+        [CsvConverter(typeof(JsonCsvConverter<List<Guid>>))]
         public List<Guid>? RelatedModelIds { get; set; }
         public int CustomFormField { get; set; }
 
-        public class SubModelSimple
+        [CsvRecord]
+        public partial class SubModelSimple
         {
             public string? Property1 { get; set; }
             public int Property2 { get; set; }
